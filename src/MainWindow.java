@@ -1,36 +1,21 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class MainWindow extends JFrame {
+class MainWindow extends JFrame {
     private JScrollPane inputPane, outputPane;
     private JLabel inputLabel, outputLabel;
 
     private BufferedImage inputImage;
     private BufferedImage outputImage;
 
-    private void addComponents(JComponent... args) {
-        Container pane = getContentPane();
-        GroupLayout gl = new GroupLayout(pane);
-        pane.setLayout(gl);
-
-        gl.setAutoCreateContainerGaps(true);
-
-        for (JComponent comp: args) {
-            gl.setHorizontalGroup(gl.createSequentialGroup().addComponent(comp));
-            gl.setVerticalGroup(gl.createParallelGroup().addComponent(comp));
-        }
-
-        pack();
-    }
-
-    public MainWindow() {
+    MainWindow() {
         // set title
         setTitle("CS-555 Image Processor");
-        setLayout(new FlowLayout());
+        setLayout(new GridLayout(1, 2));
 
         try {
             File f = new File("test.jpg");
@@ -41,38 +26,49 @@ public class MainWindow extends JFrame {
             e.printStackTrace();
         }
 
+        initComponents();
+
+        // display
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        pack();
+        setVisible(true);
+    }
+
+    private void updateOutputImage() {
+        outputLabel.setIcon(new ImageIcon(outputImage));
+    }
+
+    private void initComponents() {
         inputLabel = new JLabel(new ImageIcon(inputImage));
         outputLabel = new JLabel(new ImageIcon(outputImage));
 
         inputPane = new JScrollPane(inputLabel);
-        inputPane.setPreferredSize(new Dimension(512,512));
+        inputPane.setPreferredSize(new Dimension(512, 512));
 
         outputPane = new JScrollPane(outputLabel);
-        outputPane.setPreferredSize(new Dimension(512,512));
+        outputPane.setPreferredSize(new Dimension(512, 512));
 
         add(inputPane);
         add(outputPane);
 
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("rename this");
-        JMenuItem updateButton = new JMenuItem("update");
-        updateButton.addActionListener(l -> updateOutputImage());
+        JMenuItem updateButton = new JMenuItem("test actions");
+        updateButton.addActionListener(l -> testActions());
         menu.add(updateButton);
         menuBar.add(menu);
         setJMenuBar(menuBar);
-
-        // display
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        pack();
-        setVisible(true);
-
-        outputImage = new ProcessableImage(inputImage)
-                .apply(x -> ProcessableImage.scaleNearestNeighbor(x,64,64))
-                .toImage();
     }
 
-    public void updateOutputImage() {
-        outputLabel.setIcon(new ImageIcon(outputImage));
+    private void testActions() {
+        ProcessableImage processableImage = new ProcessableImage(inputImage);
+        processableImage = processableImage.apply(
+                x -> Assignment1.toGrayscale(x),
+                x -> Assignment1.scaleNearestNeighbor(x, 64, 64),
+                x -> Assignment1.changeBitDepth(x, 4),
+                x -> Assignment1.scaleNearestNeighbor(x, 512, 512)
+        );
+        outputImage = processableImage.toImage();
+        updateOutputImage();
     }
 }

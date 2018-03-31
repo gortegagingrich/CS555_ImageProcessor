@@ -15,7 +15,7 @@ public class ProcessableImage {
     public ProcessableImage(BufferedImage img) {
         width = img.getWidth();
         height = img.getHeight();
-        pixels = getGrayscale(img);
+        pixels = readBufferedImage(img);
     }
 
     /**
@@ -29,51 +29,35 @@ public class ProcessableImage {
         pixels = new int[width][height];
 
         for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                pixels[i][j] = sourceImage.pixels[i][j];
-            }
+            System.arraycopy(sourceImage.pixels[i], 0, pixels[i], 0, height);
         }
-    }
-
-    /**
-     * Reads each pixel from source image generates a 2D integer array from the averaged rgb values;
-     *
-     * @param img source image
-     * @return matrix of pixels
-     */
-    private int[][] getGrayscale(BufferedImage img) {
-        int[][] pixels = new int[img.getWidth()][img.getHeight()];
-
-        for (int i = 0; i < img.getWidth(); i++) {
-            for (int j = 0; j < img.getHeight(); j++) {
-                int rgb = img.getRGB(i,j);
-                int r = (rgb >> 16) & 0xFF;
-                int g = (rgb >> 8) & 0xFF;
-                int b = rgb & 0xFF;
-                rgb = (r + g + b) / 3;
-
-                rgb = rgb | (rgb << 8) | (rgb << 16);
-
-                pixels[i][j] = rgb;
-            }
-        }
-
-        return pixels;
     }
 
     /**
      * Function for sequentially applying filters
-     *
+     * <p>
      * Creates copy of image to avoid side effects.
      * For each passed action, copy.pixels <- action.apply(pixels)
      *
-     * @param actions
      * @return a new ProcessableImage created from this instance with given functions applied.
      */
-    public ProcessableImage apply(Function<int[][],int[][]>... actions) {
+    ProcessableImage apply() {
+        return new ProcessableImage(this);
+    }
+
+    /**
+     * Function for sequentially applying filters
+     * <p>
+     * Creates copy of image to avoid side effects.
+     * For each passed action, copy.pixels <- action.apply(pixels)
+     *
+     * @param actions ordered list of filters to apply to the image
+     * @return a new ProcessableImage created from this instance with given functions applied.
+     */
+    ProcessableImage apply(Function<int[][], int[][]>... actions) {
         ProcessableImage copy = new ProcessableImage(this);
 
-        for (Function f: actions) {
+        for (Function f : actions) {
             copy.pixels = (int[][]) f.apply(copy.pixels);
             copy.width = copy.pixels.length;
             copy.height = copy.pixels[0].length;
@@ -88,46 +72,34 @@ public class ProcessableImage {
      * @return BufferedImage represented by pixel array
      */
     public BufferedImage toImage() {
-        BufferedImage out = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
+        BufferedImage out = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         int grayscale;
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 grayscale = pixels[i][j];
-                out.setRGB(i,j,grayscale);
+                out.setRGB(i, j, grayscale);
             }
         }
 
         return out;
     }
 
-    /**
-     *
-     *
-     * @param img matrix of pixels for input image
-     * @return matrix of pixels for output image
-     */
-    public static int[][] scaleNearestNeighbor(int[][] img, int width, int height) {
-        width = width > 0 ? width : 1;
-        height = height > 0 ? height : 1;
+    public static int[][] readBufferedImage(BufferedImage img) {
+        int[][] pixels;
 
-        int sourceWidth, sourceHeight;
-        int x,y;
-        int[][] out;
+        if (img.getHeight() != 0 && img.getWidth() != 0) {
+            pixels = new int[img.getWidth()][img.getHeight()];
 
-        out = new int[width][height];
-        sourceWidth = img.length;
-        sourceHeight = img[0].length;
-
-        for (int i = 0; i < width; i++) {
-            x = (int)((double)i / width * sourceWidth);
-
-            for (int j = 0; j < height; j++) {
-                y = (int)((double)j / height * sourceHeight);
-                out[i][j] = img[x][y];
+            for (int i = 0; i < pixels.length; i++) {
+                for (int j = 0; j < pixels[i].length; j++) {
+                    pixels[i][j] = img.getRGB(i, j);
+                }
             }
+        } else {
+            pixels = null;
         }
 
-        return out;
+        return pixels;
     }
 }
