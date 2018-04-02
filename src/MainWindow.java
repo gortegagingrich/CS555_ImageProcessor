@@ -19,7 +19,13 @@ class MainWindow extends JFrame {
 
         try {
             File f = new File("test.jpg");
+            JFileChooser jfc = new JFileChooser();
 
+            int retVal = jfc.showOpenDialog(this);
+
+            if (retVal == JFileChooser.APPROVE_OPTION) {
+                f = jfc.getSelectedFile();
+            }
             inputImage = ImageIO.read(f);
             outputImage = ImageIO.read(f);
         } catch (IOException e) {
@@ -31,6 +37,7 @@ class MainWindow extends JFrame {
         // display
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pack();
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
