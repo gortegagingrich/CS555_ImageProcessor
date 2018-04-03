@@ -31,7 +31,7 @@ public class Assignment1 {
         int[][] out = new int[img.length][img[0].length];
 
         for (int i = 0; i < out.length; i++) {
-            for (int j = 0; j < out.length; j++) {
+            for (int j = 0; j < out[i].length; j++) {
                 out[i][j] = convertGrayscaleBit(img[i][j], depth);
             }
         }
@@ -41,7 +41,9 @@ public class Assignment1 {
 
     private static int convertGrayscaleBit(int rgb, int depth) {
 
+
         rgb = 0xFF & rgb >> (8 - depth) << (8 - depth);
+
         //System.out.println(rgb);
 
         return rgb | (rgb << 8) | (rgb << 16);
