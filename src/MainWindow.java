@@ -21,11 +21,14 @@ class MainWindow extends JFrame {
             File f = new File("test.jpg");
             JFileChooser jfc = new JFileChooser();
 
+            /*
             int retVal = jfc.showOpenDialog(this);
 
             if (retVal == JFileChooser.APPROVE_OPTION) {
                 f = jfc.getSelectedFile();
             }
+            */
+
             inputImage = ImageIO.read(f);
             outputImage = ImageIO.read(f);
         } catch (IOException e) {
@@ -70,10 +73,9 @@ class MainWindow extends JFrame {
     private void testActions() {
         ProcessableImage processableImage = new ProcessableImage(inputImage);
         processableImage = processableImage.apply(
-                x -> Assignment1.toGrayscale(x),
-                x -> Assignment1.scaleNearestNeighbor(x, 64, 64),
-                x -> Assignment1.changeBitDepth(x, 4),
-                x -> Assignment1.scaleNearestNeighbor(x, 512, 512)
+                x -> Assignment1.scaleNearestNeighbor(x, 256, 256)
+                //,x-> Assignment1.scaleNearestNeighbor(x, 512, 512)
+                ,x -> ProcessableImage.linearInterpolation(x,512, 512, true)
         );
         outputImage = processableImage.toImage();
         updateOutputImage();
