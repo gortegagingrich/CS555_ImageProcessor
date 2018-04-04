@@ -128,21 +128,21 @@ public class Assignment1 {
    
    private static void lerpVerical(int[][] in, int[][] out) {
       for (int i = 0; i < out.length; i++) {
-         int y = Math.min((int) ((double) i / out.length * in.length),
+         int x = Math.min((int) ((double) i / out.length * in.length),
                           in.length - 1);
          
          for (int j = 0; j < out[0].length; j++) {
-            double x = (double) j / out[0].length;  // relative locationof destination pixel
-            double x0 = Math.min(in[0].length - 1, Math.floor(
-                    x * in[0].length)); // position of pixel to left
-            double dx0 = x - x0 / in[0].length; // weight of pixel to left
-            double x1 = Math.min(in[0].length - 1, Math.ceil(
-                    x * in[0].length)); // position of pixel to right
-            double dx1 = x1 / in[0].length - x; // weight of pixel to right
-            
-            out[i][j] = (x0 == x1) ?
-                        (in[y][(int) x0] & 0xFF) :
-                        (int) ((1 - dx0 / (dx0 + dx1)) * (in[y][(int) x0] & 0xFF) + (1 - dx1 / (dx0 + dx1)) * (in[y][(int) x1] & 0xFF)) & 0xFF;
+            double y = (double) j / out[0].length;  // relative locationof destination pixel
+            double y0 = Math.min(in[0].length - 1, Math.floor(
+                    y * in[0].length)); // position of pixel to left
+            double dy0 = y - y0 / in[0].length; // weight of pixel to left
+            double y1 = Math.min(in[0].length - 1, Math.ceil(
+                    y * in[0].length)); // position of pixel to right
+            double dy1 = y1 / in[0].length - y; // weight of pixel to right
+   
+            out[i][j] = (y0 == y1) ?
+                        (in[x][(int) y0]) :
+                        (int) ((1 - dy0 / (dy0 + dy1)) * (in[x][(int) y0]) + (1 - dy1 / (dy0 + dy1)) * (in[x][(int) y1]));
          }
       }
    }
