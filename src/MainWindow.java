@@ -16,7 +16,7 @@ class MainWindow extends JFrame {
    
    public static int bitDepth = 8;
    
-   private Vector<Function<int[][], int[][]>> filters;
+   private final Vector<Function<int[][], int[][]>> filters;
    
    MainWindow() {
       // set title
@@ -77,12 +77,70 @@ class MainWindow extends JFrame {
       JMenu grayscale = new JMenu("gray scale");
       
       JMenuItem nearestNeighbor = new JMenuItem("Nearest Neighbor");
+      nearestNeighbor.addActionListener(l -> {
+         JTextField w = new JTextField(),h = new JTextField();
+         JLabel wl = new JLabel("width"), hl = new JLabel("height");
+         w.setColumns(5);
+         h.setColumns(5);
+
+         JOptionPane.showMessageDialog(this,new JPanel(){{
+            add(wl);
+            add(w);
+            add(hl);
+            add(h);
+         }});
+
+         if (w.getText().length() != 0 && h.getText().length() != 0) {
+            filters.add(x -> Assignment1.scaleNearestNeighbor(x,Integer.parseInt(w.getText()),Integer.parseInt(h.getText())));
+            applyFilters();
+         };
+      });
       spatial.add(nearestNeighbor);
       
       JMenuItem linearInterpolation = new JMenuItem("Linear Interpolation");
+      linearInterpolation.addActionListener(l -> {
+         JTextField w = new JTextField(),h = new JTextField();
+         JLabel wl = new JLabel("width"), hl = new JLabel("height");
+         w.setColumns(5);
+         h.setColumns(5);
+         JComboBox jcb = new JComboBox();
+         jcb.addItem("horizontal");
+         jcb.addItem("vertical");
+
+         JOptionPane.showMessageDialog(this,new JPanel(){{
+            add(wl);
+            add(w);
+            add(hl);
+            add(h);
+            add(jcb);
+         }});
+
+         if (w.getText().length() != 0 && h.getText().length() != 0) {
+            filters.add(x -> Assignment1.linearInterpolation(x,Integer.parseInt(w.getText()),Integer.parseInt(h.getText()), (jcb.getSelectedItem()).equals("horizontal")));
+            applyFilters();
+         };
+      });
       spatial.add(linearInterpolation);
       
       JMenuItem bilinearInterpolation = new JMenuItem("Bilinear Interpolation");
+      bilinearInterpolation.addActionListener(l -> {
+         JTextField w = new JTextField(),h = new JTextField();
+         JLabel wl = new JLabel("width"), hl = new JLabel("height");
+         w.setColumns(5);
+         h.setColumns(5);
+
+         JOptionPane.showMessageDialog(this,new JPanel(){{
+            add(wl);
+            add(w);
+            add(hl);
+            add(h);
+         }});
+
+         if (w.getText().length() != 0 && h.getText().length() != 0) {
+            filters.add(x -> Assignment1.bilinearInterpolation(x,Integer.parseInt(w.getText()),Integer.parseInt(h.getText())));
+            applyFilters();
+         };
+      });
       spatial.add(bilinearInterpolation);
       
       scale.add(spatial);
@@ -115,12 +173,12 @@ class MainWindow extends JFrame {
    }
    
    private void setTestActions() {
-      
-      filters = new Vector<Function<int[][], int[][]>>() {{
+      filters.clear();
+      filters.addAll(new Vector<Function<int[][], int[][]>>() {{
          add(x -> Assignment1.scaleNearestNeighbor(x, 128, 128));
          add(x -> Assignment1.linearInterpolation(x, 480, 480, true));
          add(x -> Assignment1.changeBitDepth(x, 4));
-      }};
+      }});
       
       applyFilters();
    }
