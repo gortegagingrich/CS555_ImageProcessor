@@ -1,3 +1,10 @@
+/*
+ * Name: Gabriel Ortega-Gingrich
+ * Assignment: Homework 1
+ * Description: Implementation of several basic algorithms for changing spatial
+ * and gray-scale resolution
+ */
+
 public class Assignment1 {
    /**
     * @param img matrix of pixels for input image
@@ -76,22 +83,13 @@ public class Assignment1 {
       
       out = new int[width][height];
       
-      int[][] h = new int[width][height];
+      int[][] h = new int[width][img[0].length];
       int[][] v = new int[width][height];
       
       lerpHorizontal(img, h);
-      lerpVerical(img, v);
+      lerpVerical(h, v);
       
-      for (int i = 0; i < width; i++) {
-         for (int j = 0; j < height; j++) {
-            int a = h[i][j];
-            int b = v[i][j];
-            
-            out[i][j] = (a + b) / 2;
-         }
-      }
-      
-      return out;
+      return v;
    }
    
    /**
@@ -139,7 +137,7 @@ public class Assignment1 {
             double y1 = Math.min(in[0].length - 1, Math.ceil(
                     y * in[0].length)); // position of pixel to right
             double dy1 = y1 / in[0].length - y; // weight of pixel to right
-   
+            
             out[i][j] = (y0 == y1) ?
                         (in[x][(int) y0]) :
                         (int) ((1 - dy0 / (dy0 + dy1)) * (in[x][(int) y0]) + (1 - dy1 / (dy0 + dy1)) * (in[x][(int) y1]));

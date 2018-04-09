@@ -1,3 +1,10 @@
+/*
+ * Name: Gabriel Ortega-Gingrich
+ * Assignment: Homework 1
+ * Description: Implementation of several basic algorithms for changing spatial
+ * and gray-scale resolution
+ */
+
 import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
@@ -62,6 +69,10 @@ public class GrayscaleImage {
       
       if (img.getHeight() != 0 && img.getWidth() != 0) {
          pixels = new int[img.getWidth()][img.getHeight()];
+         
+         if (img.getHeight() == 511) {
+            System.out.println("idk");
+         }
          
          for (int i = 0; i < pixels.length; i++) {
             for (int j = 0; j < pixels[i].length; j++) {

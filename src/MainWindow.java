@@ -1,3 +1,10 @@
+/*
+ * Name: Gabriel Ortega-Gingrich
+ * Assignment: Homework 1
+ * Description: Implementation of several basic algorithms for changing spatial
+ * and gray-scale resolution
+ */
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -78,20 +85,29 @@ class MainWindow extends JFrame {
       
       JMenuItem nearestNeighbor = new JMenuItem("Nearest Neighbor");
       nearestNeighbor.addActionListener(l -> {
-         JTextField w = new JTextField(),h = new JTextField();
-         JLabel wl = new JLabel("width"), hl = new JLabel("height");
+         JTextField w, h;
+         JLabel wl, hl;
+         w = new JTextField(String.format("%d", outputImage.getWidth()));
+         h = new JTextField(String.format("%d", outputImage.getHeight()));
+         wl = new JLabel("width");
+         hl = new JLabel("height");
          w.setColumns(5);
          h.setColumns(5);
-
-         JOptionPane.showMessageDialog(this,new JPanel(){{
+         
+         JOptionPane.showMessageDialog(this, new JPanel() {{
+            setLayout(new FlowLayout());
             add(wl);
             add(w);
             add(hl);
             add(h);
          }});
-
+         
          if (w.getText().length() != 0 && h.getText().length() != 0) {
-            filters.add(x -> Assignment1.scaleNearestNeighbor(x,Integer.parseInt(w.getText()),Integer.parseInt(h.getText())));
+            filters.add(x -> Assignment1.scaleNearestNeighbor(x,
+                                                              Integer.parseInt(
+                                                                      w.getText()),
+                                                              Integer.parseInt(
+                                                                      h.getText())));
             applyFilters();
          };
       });
@@ -99,24 +115,34 @@ class MainWindow extends JFrame {
       
       JMenuItem linearInterpolation = new JMenuItem("Linear Interpolation");
       linearInterpolation.addActionListener(l -> {
-         JTextField w = new JTextField(),h = new JTextField();
-         JLabel wl = new JLabel("width"), hl = new JLabel("height");
+         JTextField w, h;
+         JLabel wl, hl;
+         w = new JTextField(String.format("%d", outputImage.getWidth()));
+         h = new JTextField(String.format("%d", outputImage.getHeight()));
+         wl = new JLabel("width");
+         hl = new JLabel("height");
          w.setColumns(5);
          h.setColumns(5);
          JComboBox jcb = new JComboBox();
          jcb.addItem("horizontal");
          jcb.addItem("vertical");
-
-         JOptionPane.showMessageDialog(this,new JPanel(){{
+         
+         JOptionPane.showMessageDialog(this, new JPanel() {{
             add(wl);
             add(w);
             add(hl);
             add(h);
             add(jcb);
          }});
-
+         
          if (w.getText().length() != 0 && h.getText().length() != 0) {
-            filters.add(x -> Assignment1.linearInterpolation(x,Integer.parseInt(w.getText()),Integer.parseInt(h.getText()), (jcb.getSelectedItem()).equals("horizontal")));
+            filters.add(x -> Assignment1.linearInterpolation(x,
+                                                             Integer.parseInt(
+                                                                     w.getText()),
+                                                             Integer.parseInt(
+                                                                     h.getText()),
+                                                             (jcb.getSelectedItem()).equals(
+                                                                     "horizontal")));
             applyFilters();
          };
       });
@@ -124,20 +150,28 @@ class MainWindow extends JFrame {
       
       JMenuItem bilinearInterpolation = new JMenuItem("Bilinear Interpolation");
       bilinearInterpolation.addActionListener(l -> {
-         JTextField w = new JTextField(),h = new JTextField();
-         JLabel wl = new JLabel("width"), hl = new JLabel("height");
+         JTextField w, h;
+         JLabel wl, hl;
+         w = new JTextField(String.format("%d", outputImage.getWidth()));
+         h = new JTextField(String.format("%d", outputImage.getHeight()));
+         wl = new JLabel("width");
+         hl = new JLabel("height");
          w.setColumns(5);
          h.setColumns(5);
-
-         JOptionPane.showMessageDialog(this,new JPanel(){{
+         
+         JOptionPane.showMessageDialog(this, new JPanel() {{
             add(wl);
             add(w);
             add(hl);
             add(h);
          }});
-
+         
          if (w.getText().length() != 0 && h.getText().length() != 0) {
-            filters.add(x -> Assignment1.bilinearInterpolation(x,Integer.parseInt(w.getText()),Integer.parseInt(h.getText())));
+            filters.add(x -> Assignment1.bilinearInterpolation(x,
+                                                               Integer.parseInt(
+                                                                       w.getText()),
+                                                               Integer.parseInt(
+                                                                       h.getText())));
             applyFilters();
          };
       });
