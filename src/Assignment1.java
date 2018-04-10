@@ -7,8 +7,11 @@
 
 public class Assignment1 {
    /**
+    * Uses nearest neighbor interpolation to change the spatial resolution
+    * of the given matrix of pixels
+    *
     * @param img matrix of pixels for input image
-    * @return matrix of pixels for output image
+    * @return spatially scaled matrix of pixels
     */
    public static int[][] scaleNearestNeighbor(int[][] img, int width, int height) {
       width = width > 0 ? width : 1;
@@ -33,31 +36,56 @@ public class Assignment1 {
       
       return out;
    }
-   
+
+   /**
+    * Changes the grayscale resolution of the given matrix of pixels.
+    * Uses static variable in MainWindow to get source depth.
+    * Output is the same object to speed up the process because
+    * the spatial resolution is maintained
+    *
+    * @param img input image as matrix of pixels
+    * @param outDepth destination bit depth
+    * @return representation of image with gray-scale resolution changed
+    */
    public static int[][] changeBitDepth(int[][] img, int outDepth) {
-      int[][] out = new int[img.length][img[0].length];
-      
-      int inDepth = MainWindow.bitDepth;
-      
-      for (int i = 0; i < out.length; i++) {
-         for (int j = 0; j < out[i].length; j++) {
-            out[i][j] = convertGrayscaleBit(img[i][j], inDepth, outDepth);
+      for (int i = 0; i < img.length; i++) {
+         for (int j = 0; j < img[i].length; j++) {
+            img[i][j] = convertGrayscaleBit(img[i][j], MainWindow.bitDepth, outDepth);
          }
       }
       
       MainWindow.bitDepth = outDepth;
       
-      return out;
+      return img;
    }
-   
-   private static int convertGrayscaleBit(int rgb, int depthIn, int depthOut) {
-      double ratio = (double) rgb / ((1 << (depthIn)) - 1);
+
+   /**
+    * Convert's gray-scale resolution of given pixel
+    *
+    * @param gsIn input gray-scale value
+    * @param depthIn input gray-scale depth
+    * @param depthOut output gray-scale depth
+    * @return new gray-scale value
+    */
+   private static int convertGrayscaleBit(int gsIn, int depthIn, int depthOut) {
+      double ratio = (double) gsIn / ((1 << (depthIn)) - 1);
       int max = (1 << depthOut) - 1;
-      rgb = (int) Math.round(ratio * max);
+      gsIn = (int) Math.round(ratio * max);
       
-      return rgb;
+      return gsIn;
    }
-   
+
+   /**
+    * Scales given matrix of pixels with either horizontal
+    * or vertical linear interpolation
+    *
+    * @param img matrix of pixels
+    * @param width output width
+    * @param height output height
+    * @param horizontal true -> horizontal linear interpolation;
+    *                   false -> vertical linear interpolation
+    * @return spatially scaled matrix of pixels
+    */
    public static int[][] linearInterpolation(int[][] img, int width, int height, boolean horizontal) {
       int[][] out;
       
@@ -67,27 +95,35 @@ public class Assignment1 {
       out = new int[width][height];
       
       if (horizontal) {
-         lerpHorizontal(img, out);
+         horizontalLinearInterp(img, out);
       } else {
-         lerpVerical(img, out);
+         verticalLinearInterp(img, out);
       }
       
       return out;
    }
-   
+
+   /**
+    * Spatially scales matrix of pixels first with horizontal
+    * linear interpolation and then with vertical linear
+    * interpolation.
+    *
+    * @param img input matrix of pixels
+    * @param width output width
+    * @param height output height
+    * @return spatially scaled matrix of pixels
+    */
    public static int[][] bilinearInterpolation(int[][] img, int width, int height) {
-      int[][] out;
-      
+      // ensure output image is 1x1 or larger
       width = Math.max(width, 1);
       height = Math.max(height, 1);
-      
-      out = new int[width][height];
-      
+
+      // perform linear interpolation horizontally and then vertically
       int[][] h = new int[width][img[0].length];
       int[][] v = new int[width][height];
       
-      lerpHorizontal(img, h);
-      lerpVerical(h, v);
+      horizontalLinearInterp(img, h);
+      verticalLinearInterp(h, v);
       
       return v;
    }
@@ -95,10 +131,10 @@ public class Assignment1 {
    /**
     * linearly interpolate looking at pixels in the row
     *
-    * @param in  input image
-    * @param out output image
+    * @param in  input matrix of pixels
+    * @param out output matrix of pixels
     */
-   private static void lerpHorizontal(int[][] in, int[][] out) {
+   private static void horizontalLinearInterp(int[][] in, int[][] out) {
       
       for (int i = 0; i < out[0].length; i++) {
          int y = Math.min((int) ((double) i / out[0].length * in[0].length),
@@ -107,36 +143,60 @@ public class Assignment1 {
          if (y >= in.length) {
             System.out.println(y);
          }
-         
+
+         double x;
+         double x0;
+         double dx0;
+         double x1;
+         double dx1;
+
          for (int j = 0; j < out.length; j++) {
-            double x = (double) j / out.length;  // relative location of destination pixel
-            double x0 = Math.min(in.length - 1, Math.floor(
-                    x * in.length)); // position of pixel to left
-            double dx0 = x - x0 / in.length; // weight of pixel to left
-            double x1 = Math.min(in.length - 1, Math.ceil(
-                    x * in.length)); // position of pixel to right
-            double dx1 = x1 / in.length - x; // weight of pixel to right
-            
+            // relative location of destination pixel
+            x = (double) j / out.length;
+            // position of pixel to left
+            x0 = Math.min(in.length - 1, Math.floor(
+                    x * in.length));
+            // weight of pixel to left
+            dx0 = x - x0 / in.length;
+            // position of pixel to right
+            x1 = Math.min(in.length - 1, Math.ceil(
+                    x * in.length));
+            // weight of pixel to right
+            dx1 = x1 / in.length - x;
+
             out[j][i] = (x0 == x1) ?
                         (in[(int) x0][y]) :
                         (int) ((1 - dx0 / (dx0 + dx1)) * in[(int) x0][y] + (1 - dx1 / (dx0 + dx1)) * in[(int) x1][y]);
          }
       }
    }
-   
-   private static void lerpVerical(int[][] in, int[][] out) {
+
+   /**
+    * linearly interpolate looking at pixels in the column
+    *
+    * @param in  input matrix of pixels
+    * @param out output matrix of pixels
+    */
+   private static void verticalLinearInterp(int[][] in, int[][] out) {
+      int x;
+      double y;
+      double y0;
+      double dy0;
+      double y1;
+      double dy1;
+
       for (int i = 0; i < out.length; i++) {
-         int x = Math.min((int) ((double) i / out.length * in.length),
+         x = Math.min((int) ((double) i / out.length * in.length),
                           in.length - 1);
-         
+
          for (int j = 0; j < out[0].length; j++) {
-            double y = (double) j / out[0].length;  // relative locationof destination pixel
-            double y0 = Math.min(in[0].length - 1, Math.floor(
-                    y * in[0].length)); // position of pixel to left
-            double dy0 = y - y0 / in[0].length; // weight of pixel to left
-            double y1 = Math.min(in[0].length - 1, Math.ceil(
-                    y * in[0].length)); // position of pixel to right
-            double dy1 = y1 / in[0].length - y; // weight of pixel to right
+            y = (double) j / out[0].length;  // relative location of destination pixel
+            y0 = Math.min(in[0].length - 1, Math.floor(
+                    y * in[0].length)); // position of pixel above
+            dy0 = y - y0 / in[0].length; // weight of pixel above
+            y1 = Math.min(in[0].length - 1, Math.ceil(
+                    y * in[0].length)); // position of pixel below
+            dy1 = y1 / in[0].length - y; // weight of pixel below
             
             out[i][j] = (y0 == y1) ?
                         (in[x][(int) y0]) :

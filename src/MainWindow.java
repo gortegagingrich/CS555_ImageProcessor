@@ -54,6 +54,7 @@ class MainWindow extends JFrame {
    }
    
    private void initComponents() {
+      // setup picture display
       inputLabel = new JLabel(new ImageIcon(inputImage));
       outputLabel = new JLabel(new ImageIcon(outputImage));
       
@@ -65,24 +66,30 @@ class MainWindow extends JFrame {
       
       add(inputPane);
       add(outputPane);
-      
+
+      // setup menus
       JMenuBar menuBar = new JMenuBar();
-      
+
+      // button for hard coded test actions
       JMenuItem updateButton = new JMenuItem("test actions");
       updateButton.addActionListener(l -> setTestActions());
       updateButton.setAccelerator(KeyStroke.getKeyStroke("F5"));
-      
+
+      // reading image from file
       JMenu file = new JMenu("file");
       JMenuItem loadButton = new JMenuItem("Load Image");
       loadButton.addActionListener(l -> loadImage());
       file.add(loadButton);
-      
+
+      // edit menu
       JMenu edit = new JMenu("edit");
-      
+
+      // add submenus
       JMenu scale = new JMenu("resolution");
       JMenu spatial = new JMenu("spatial");
-      JMenu grayscale = new JMenu("gray scale");
-      
+      JMenu grayscale = new JMenu("gray-scale");
+
+      // menu item for nearest neighbor spatial scaling
       JMenuItem nearestNeighbor = new JMenuItem("Nearest Neighbor");
       nearestNeighbor.addActionListener(l -> {
          JTextField w, h;
@@ -112,7 +119,8 @@ class MainWindow extends JFrame {
          };
       });
       spatial.add(nearestNeighbor);
-      
+
+      // menu item for spatial scaling with linear interpolation
       JMenuItem linearInterpolation = new JMenuItem("Linear Interpolation");
       linearInterpolation.addActionListener(l -> {
          JTextField w, h;
@@ -123,6 +131,8 @@ class MainWindow extends JFrame {
          hl = new JLabel("height");
          w.setColumns(5);
          h.setColumns(5);
+
+         // choose horizontal/vertical with combo box
          JComboBox jcb = new JComboBox();
          jcb.addItem("horizontal");
          jcb.addItem("vertical");
@@ -136,18 +146,20 @@ class MainWindow extends JFrame {
          }});
          
          if (w.getText().length() != 0 && h.getText().length() != 0) {
-            filters.add(x -> Assignment1.linearInterpolation(x,
-                                                             Integer.parseInt(
-                                                                     w.getText()),
-                                                             Integer.parseInt(
-                                                                     h.getText()),
-                                                             (jcb.getSelectedItem()).equals(
-                                                                     "horizontal")));
+            filters.add(x ->
+                    Assignment1.linearInterpolation(x,
+                                                    Integer.parseInt(
+                                                            w.getText()),
+                                                    Integer.parseInt(
+                                                            h.getText()),
+                                                    (jcb.getSelectedItem()).equals(
+                                                            "horizontal")));
             applyFilters();
          };
       });
       spatial.add(linearInterpolation);
-      
+
+      // menu item for scaling by bilinear interpolation
       JMenuItem bilinearInterpolation = new JMenuItem("Bilinear Interpolation");
       bilinearInterpolation.addActionListener(l -> {
          JTextField w, h;
@@ -167,11 +179,12 @@ class MainWindow extends JFrame {
          }});
          
          if (w.getText().length() != 0 && h.getText().length() != 0) {
-            filters.add(x -> Assignment1.bilinearInterpolation(x,
-                                                               Integer.parseInt(
-                                                                       w.getText()),
-                                                               Integer.parseInt(
-                                                                       h.getText())));
+            filters.add(x ->
+                    Assignment1.bilinearInterpolation(x,
+                                                      Integer.parseInt(
+                                                              w.getText()),
+                                                      Integer.parseInt(
+                                                              h.getText())));
             applyFilters();
          };
       });
@@ -179,21 +192,22 @@ class MainWindow extends JFrame {
       
       scale.add(spatial);
       edit.add(scale);
-      
-      JMenu bitDepthMenu = new JMenu("bit depth");
+
+      // menu for gray-scale resolution
       for (int i = 1; i < 9; i++) {
+         // add buttons for 1-8 bits
          JMenuItem b = new JMenuItem(String.format("%d", i));
          int finalI = i;
          b.addActionListener(l -> {
             filters.add(x -> Assignment1.changeBitDepth(x, finalI));
             applyFilters();
          });
-         bitDepthMenu.add(b);
+         grayscale.add(b);
       }
-      grayscale.add(bitDepthMenu);
       
       scale.add(grayscale);
-      
+
+      // allow for clearing all filters
       JMenuItem clear = new JMenuItem("clear");
       clear.addActionListener(l -> clearFilters());
       
