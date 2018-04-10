@@ -8,63 +8,76 @@
 import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
-public class GrayscaleImage {
+class GrayscaleImage {
    // I'm using ints to avoid having to cast to bytes
    private int[][] pixels;
    private int width;
    private int height;
    
+   /**
+    * Creates GrayscaleImage by reading a buffered image pixel by pixel.
+    * Assumes the source image is already a gray-scale image, so it only
+    * deals with the red value of each pixel.
+    *
+    * @param img source image
+    */
    public GrayscaleImage(BufferedImage img) {
       width = img.getWidth();
       height = img.getHeight();
       pixels = readBufferedImage(img);
    }
    
-   public GrayscaleImage(GrayscaleImage sourceImage) {
-      width = sourceImage.width;
-      height = sourceImage.height;
-      pixels = new int[width][height];
-      
-      for (int i = 0; i < width; i++) {
-         System.arraycopy(sourceImage.pixels[i], 0, pixels[i], 0, height);
-      }
-   }
-   
-   GrayscaleImage apply(Function<int[][], int[][]>... actions) {
-      GrayscaleImage copy = new GrayscaleImage(this);
-      
+   /**
+    * Applies given filters in order.
+    * Returns self just to make chaining for tests easier.
+    *
+    * @param actions filters to apply
+    * @return self after filters are applied
+    */
+   @SafeVarargs
+   final GrayscaleImage apply(Function<int[][], int[][]>... actions) {
       for (Function f : actions) {
-         copy.pixels = (int[][]) f.apply(copy.pixels);
-         copy.width = copy.pixels.length;
-         copy.height = copy.pixels[0].length;
+         //noinspection unchecked
+         pixels = (int[][]) f.apply(pixels);
+         width = pixels.length;
+         height = pixels[0].length;
       }
       
-      return copy;
+      return this;
    }
    
-   public BufferedImage toImage(int bitDepth) {
+   /**
+    * Generates BufferedImage from matrix of pixels.
+    * Bit depth is not stored internally because all instances of GrayscaleImage
+    * are temporary.
+    *
+    * @return generated image
+    */
+   public BufferedImage toImage() {
       BufferedImage out = new BufferedImage(width, height,
                                             BufferedImage.TYPE_INT_RGB);
-      int grayscale;
+      int gs;
       
       for (int i = 0; i < width; i++) {
          for (int j = 0; j < height; j++) {
-            grayscale = pixels[i][j];
-            double ratio = (double) grayscale / ((1 << MainWindow.bitDepth) - 1);
-            grayscale = (int) (ratio * 0xFF);
-            out.setRGB(i, j,
-                       0xFFFFFF & (grayscale + (grayscale << 8) + (grayscale << 16)));
+            gs = pixels[i][j];
+            double ratio = (double) gs / ((1 << MainWindow.bitDepth) - 1);
+            gs = (int) (ratio * 0xFF);
+            out.setRGB(i, j, 0xFFFFFF & (gs + (gs << 8) + (gs << 16)));
          }
       }
       
       return out;
    }
    
-   public int[][] getPixels() {
-      return pixels;
-   }
-   
-   public static int[][] readBufferedImage(BufferedImage img) {
+   /**
+    * Generates matrix of pixels from given buffered image by reading
+    * values pixel by pixel.
+    *
+    * @param img source image
+    * @return matrix of pixels
+    */
+   private static int[][] readBufferedImage(BufferedImage img) {
       int[][] pixels;
       
       if (img.getHeight() != 0 && img.getWidth() != 0) {
