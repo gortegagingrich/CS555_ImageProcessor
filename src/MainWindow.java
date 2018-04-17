@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.chrono.JapaneseChronology;
 import java.util.Vector;
 import java.util.function.Function;
 
@@ -84,6 +85,23 @@ class MainWindow extends JFrame {
       // edit menu
       JMenu edit = new JMenu("edit");
 
+      addAssignment1Functions(edit);
+      addAssignment2Functions(edit);
+
+      // allow for clearing all filters
+      JMenuItem clear = new JMenuItem("clear");
+      clear.addActionListener(l -> clearFilters());
+      
+      edit.add(new JSeparator());
+      edit.add(updateButton);
+      edit.add(clear);
+      
+      menuBar.add(file);
+      menuBar.add(edit);
+      setJMenuBar(menuBar);
+   }
+
+   private void addAssignment1Functions(JMenu edit) {
       // add submenus
       JMenu scale = new JMenu("resolution");
       JMenu spatial = new JMenu("spatial");
@@ -100,7 +118,7 @@ class MainWindow extends JFrame {
          hl = new JLabel("height");
          w.setColumns(5);
          h.setColumns(5);
-         
+
          JOptionPane.showMessageDialog(this, new JPanel() {{
             setLayout(new FlowLayout());
             add(wl);
@@ -108,13 +126,13 @@ class MainWindow extends JFrame {
             add(hl);
             add(h);
          }});
-         
+
          if (w.getText().length() != 0 && h.getText().length() != 0) {
             filters.add(x -> Assignment1.scaleNearestNeighbor(x,
-                                                              Integer.parseInt(
-                                                                      w.getText()),
-                                                              Integer.parseInt(
-                                                                      h.getText())));
+                    Integer.parseInt(
+                            w.getText()),
+                    Integer.parseInt(
+                            h.getText())));
             applyFilters();
          };
       });
@@ -136,7 +154,7 @@ class MainWindow extends JFrame {
          JComboBox jcb = new JComboBox();
          jcb.addItem("horizontal");
          jcb.addItem("vertical");
-         
+
          JOptionPane.showMessageDialog(this, new JPanel() {{
             add(wl);
             add(w);
@@ -144,16 +162,16 @@ class MainWindow extends JFrame {
             add(h);
             add(jcb);
          }});
-         
+
          if (w.getText().length() != 0 && h.getText().length() != 0) {
             filters.add(x ->
                     Assignment1.linearInterpolation(x,
-                                                    Integer.parseInt(
-                                                            w.getText()),
-                                                    Integer.parseInt(
-                                                            h.getText()),
-                                                    (jcb.getSelectedItem()).equals(
-                                                            "horizontal")));
+                            Integer.parseInt(
+                                    w.getText()),
+                            Integer.parseInt(
+                                    h.getText()),
+                            (jcb.getSelectedItem()).equals(
+                                    "horizontal")));
             applyFilters();
          };
       });
@@ -170,26 +188,26 @@ class MainWindow extends JFrame {
          hl = new JLabel("height");
          w.setColumns(5);
          h.setColumns(5);
-         
+
          JOptionPane.showMessageDialog(this, new JPanel() {{
             add(wl);
             add(w);
             add(hl);
             add(h);
          }});
-         
+
          if (w.getText().length() != 0 && h.getText().length() != 0) {
             filters.add(x ->
                     Assignment1.bilinearInterpolation(x,
-                                                      Integer.parseInt(
-                                                              w.getText()),
-                                                      Integer.parseInt(
-                                                              h.getText())));
+                            Integer.parseInt(
+                                    w.getText()),
+                            Integer.parseInt(
+                                    h.getText())));
             applyFilters();
          };
       });
       spatial.add(bilinearInterpolation);
-      
+
       scale.add(spatial);
       edit.add(scale);
 
@@ -204,28 +222,46 @@ class MainWindow extends JFrame {
          });
          grayscale.add(b);
       }
-      
-      scale.add(grayscale);
 
-      // allow for clearing all filters
-      JMenuItem clear = new JMenuItem("clear");
-      clear.addActionListener(l -> clearFilters());
-      
-      edit.add(new JSeparator());
-      edit.add(updateButton);
-      edit.add(clear);
-      
-      menuBar.add(file);
-      menuBar.add(edit);
-      setJMenuBar(menuBar);
+      scale.add(grayscale);
+   }
+
+   private void addAssignment2Functions(JMenu edit) {
+      // remove specific bitplanes
+      JMenuItem bitPlanes = new JMenuItem("select bit planes");
+
+      bitPlanes.addActionListener(l -> {
+         JPanel p = new JPanel();
+         p.setLayout(new GridLayout(1,7));
+         JCheckBox[] planes = new JCheckBox[8];
+
+         for (int i = 0; i < planes.length; i++){
+            planes[i] = new JCheckBox(String.format("%d", i));
+            planes[i].setSelected(true);
+            p.add(planes[i],0,i);
+         }
+
+         JOptionPane.showMessageDialog(this,p);
+
+         int bp = 0;
+
+         for (JCheckBox b: planes) {
+            bp = (bp << 1) + ((b.isSelected()) ? 1 : 0);
+         }
+
+         final int b = bp;
+
+         filters.add(x -> Assignment2.setBitPlanes(x, b));
+         applyFilters();
+      });
+
+      edit.add(bitPlanes);
    }
    
    private void setTestActions() {
       filters.clear();
       filters.addAll(new Vector<Function<int[][], int[][]>>() {{
-         add(x -> Assignment1.scaleNearestNeighbor(x, 128, 128));
-         add(x -> Assignment1.linearInterpolation(x, 480, 480, true));
-         add(x -> Assignment1.changeBitDepth(x, 4));
+         add(x -> Assignment1.changeBitPlane(x, 3));
       }});
       
       applyFilters();
