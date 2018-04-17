@@ -136,6 +136,7 @@ class MainWindow extends JFrame {
          // choose horizontal/vertical with combo box
          JComboBox jcb = new JComboBox();
          jcb.addItem("horizontal");
+         //noinspection unchecked,unchecked
          jcb.addItem("vertical");
          
          JOptionPane.showMessageDialog(this, new JPanel() {{
@@ -160,8 +161,8 @@ class MainWindow extends JFrame {
       spatial.add(linearInterpolation);
 
       // menu item for scaling by bilinear interpolation
-      JMenuItem bilinearInterpolation = new JMenuItem("Bilinear Interpolation");
-      bilinearInterpolation.addActionListener(l -> {
+      JMenuItem bilinearInterp = new JMenuItem("Bilinear Interpolation");
+      bilinearInterp.addActionListener(l -> {
          JTextField w, h;
          JLabel wl, hl;
          w = new JTextField(String.format("%d", outputImage.getWidth()));
@@ -234,7 +235,7 @@ class MainWindow extends JFrame {
       bitDepth = 8;
       Function<int[][], int[][]>[] fs = new Function[filters.size()];
       filters.toArray(fs);
-      outputImage = new GrayscaleImage(inputImage).apply(fs).toImage(bitDepth);
+      outputImage = new GrayscaleImage(inputImage).apply(fs).toImage();
       updateOutputImage();
    }
    
