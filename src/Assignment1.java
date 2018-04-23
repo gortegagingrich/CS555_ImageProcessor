@@ -209,23 +209,4 @@ class Assignment1 {
          }
       }
    }
-
-   public static int[][] changeBitPlane(int[][] img, int bitPlane) {
-      int col;
-      int bitDepth = MainWindow.bitDepth;
-      bitPlane = 1 << (bitPlane - 1);
-
-      for (int i = 0; i < img.length; i++) {
-         for (int j = 0; j < img[i].length; j++) {
-            col = img[i][j];
-
-            col = (int)(col << (8 - bitDepth));
-
-            img[i][j] = ((bitPlane & col) != 0) ? 0xFF >> (8 - bitDepth) : 0;
-
-         }
-      }
-
-      return img;
-   }
 }

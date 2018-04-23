@@ -8,6 +8,7 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -84,12 +85,29 @@ class MainWindow extends JFrame {
 
       // edit menu
       JMenu edit = new JMenu("edit");
+   
+      addAssignment1(edit);
+      addAssignment2(edit);
 
+      // allow for clearing all filters
+      JMenuItem clear = new JMenuItem("clear");
+      clear.addActionListener(l -> clearFilters());
+      
+      edit.add(new JSeparator());
+      edit.add(updateButton);
+      edit.add(clear);
+      
+      menuBar.add(file);
+      menuBar.add(edit);
+      setJMenuBar(menuBar);
+   }
+   
+   private void addAssignment1(JMenu edit) {
       // add submenus
       JMenu scale = new JMenu("resolution");
       JMenu spatial = new JMenu("spatial");
       JMenu grayscale = new JMenu("gray-scale");
-
+      
       // menu item for nearest neighbor spatial scaling
       JMenuItem nearestNeighbor = new JMenuItem("Nearest Neighbor");
       nearestNeighbor.addActionListener(l -> {
@@ -117,10 +135,11 @@ class MainWindow extends JFrame {
                                                               Integer.parseInt(
                                                                       h.getText())));
             applyFilters();
-         };
+         }
+         ;
       });
       spatial.add(nearestNeighbor);
-
+      
       // menu item for spatial scaling with linear interpolation
       JMenuItem linearInterpolation = new JMenuItem("Linear Interpolation");
       linearInterpolation.addActionListener(l -> {
@@ -132,7 +151,7 @@ class MainWindow extends JFrame {
          hl = new JLabel("height");
          w.setColumns(5);
          h.setColumns(5);
-
+         
          // choose horizontal/vertical with combo box
          JComboBox jcb = new JComboBox();
          jcb.addItem("horizontal");
@@ -156,43 +175,19 @@ class MainWindow extends JFrame {
                             (Objects.requireNonNull(jcb.getSelectedItem()))
                                     .equals("horizontal")));
             applyFilters();
-         };
+         }
+         ;
       });
       spatial.add(linearInterpolation);
-
+      
       // menu item for scaling by bilinear interpolation
       JMenuItem bilinearInterp = new JMenuItem("Bilinear Interpolation");
-      bilinearInterp.addActionListener(l -> {
-         JTextField w, h;
-         JLabel wl, hl;
-         w = new JTextField(String.format("%d", outputImage.getWidth()));
-         h = new JTextField(String.format("%d", outputImage.getHeight()));
-         wl = new JLabel("width");
-         hl = new JLabel("height");
-         w.setColumns(5);
-         h.setColumns(5);
-         
-         JOptionPane.showMessageDialog(this, new JPanel() {{
-            add(wl);
-            add(w);
-            add(hl);
-            add(h);
-         }});
-         
-         if (w.getText().length() != 0 && h.getText().length() != 0) {
-            filters.add(x -> Assignment1
-                    .bilinearInterp(
-                            x,
-                            Integer.parseInt(w.getText()),
-                            Integer.parseInt(h.getText())));
-            applyFilters();
-         };
-      });
+      bilinearInterp.addActionListener(this::scaleBilinear);
       spatial.add(bilinearInterp);
       
       scale.add(spatial);
       edit.add(scale);
-
+      
       // menu for gray-scale resolution
       for (int i = 1; i < 9; i++) {
          // add buttons for 1-8 bits
@@ -206,26 +201,47 @@ class MainWindow extends JFrame {
       }
       
       scale.add(grayscale);
-
-      // allow for clearing all filters
-      JMenuItem clear = new JMenuItem("clear");
-      clear.addActionListener(l -> clearFilters());
+   }
+   
+   private void addAssignment2(JMenu edit) {
+      JMenuItem toggleBitPlanes = new JMenuItem("Toggle bitplanes");
+      toggleBitPlanes.addActionListener(this::selectBitPlanes);
+      edit.add(toggleBitPlanes);
       
-      edit.add(new JSeparator());
-      edit.add(updateButton);
-      edit.add(clear);
+      JMenu convolutionMenu = new JMenu("convol");
       
-      menuBar.add(file);
-      menuBar.add(edit);
-      setJMenuBar(menuBar);
+      JMenuItem laplacianFilter = new JMenuItem("Laplacian");
+      laplacianFilter.addActionListener(l -> {
+         filters.add(x -> Assignment2.convol(x, Assignment2.LAPLACIAN_KERNEL, 1,
+                                             1));
+         applyFilters();
+      });
+      convolutionMenu.add(laplacianFilter);
+      
+      JMenu sharpenMenu = new JMenu("sharpen");
+      
+      JMenuItem laplacianSharpen = new JMenuItem("Laplacian");
+      laplacianSharpen.addActionListener(l -> {
+         filters.add(x -> Assignment2.laplacianSharpen(x));
+         applyFilters();
+      });
+      sharpenMenu.add(laplacianSharpen);
+      
+      JMenuItem histogramEqualize = new JMenuItem("equalize histogram");
+      histogramEqualize.addActionListener(l -> {
+         filters.add(x -> Assignment2.globalHE(x));
+         applyFilters();
+      });
+      edit.add(histogramEqualize);
+      
+      edit.add(convolutionMenu);
+      edit.add(sharpenMenu);
    }
    
    private void setTestActions() {
       filters.clear();
       filters.addAll(new Vector<Function<int[][], int[][]>>() {{
-         add(x -> Assignment1.scaleNearestNeighbor(x, 128, 128));
-         add(x -> Assignment1.linearInterp(x, 480, 480, true));
-         add(x -> Assignment1.changeBitDepth(x, 4));
+         add(x -> Assignment2.localHE(x, 3));
       }});
       
       applyFilters();
@@ -262,5 +278,58 @@ class MainWindow extends JFrame {
       filters.clear();
       bitDepth = 8;
       applyFilters();
+   }
+   
+   private void selectBitPlanes(ActionEvent l) {
+      JPanel panel = new JPanel();
+      JCheckBox[] boxes = new JCheckBox[8];
+      int planes = 0;
+      
+      panel.setLayout(new GridLayout(8, 1));
+      
+      for (int i = 0; i < 8; i++) {
+         boxes[i] = new JCheckBox(String.format("%d", i));
+         boxes[i].setSelected(true);
+         panel.add(boxes[i], i, 0);
+      }
+      
+      JOptionPane.showMessageDialog(this, panel);
+      
+      for (int i = 0; i < 8; i++) {
+         System.out.println(boxes[i].isEnabled());
+         planes |= boxes[i].isSelected() ? 1 << i : 0;
+      }
+      
+      final int p = planes;
+      
+      filters.add(x -> Assignment2.setBitPlanes(x, p));
+      applyFilters();
+   }
+   
+   private void scaleBilinear(ActionEvent l) {
+      JTextField w, h;
+      JLabel wl, hl;
+      w = new JTextField(String.format("%d", outputImage.getWidth()));
+      h = new JTextField(String.format("%d", outputImage.getHeight()));
+      wl = new JLabel("width");
+      hl = new JLabel("height");
+      w.setColumns(5);
+      h.setColumns(5);
+      
+      JOptionPane.showMessageDialog(this, new JPanel() {{
+         add(wl);
+         add(w);
+         add(hl);
+         add(h);
+      }});
+      
+      if (w.getText().length() != 0 && h.getText().length() != 0) {
+         filters.add(x -> Assignment1
+                 .bilinearInterp(
+                         x,
+                         Integer.parseInt(w.getText()),
+                         Integer.parseInt(h.getText())));
+         applyFilters();
+      }
    }
 }
