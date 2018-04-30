@@ -5,9 +5,9 @@ import java.util.HashMap;
  */
 public class Assignment2 {
    public static final int[][] LAPLACIAN_KERNEL = new int[][]{
-           {-1, -1, -1},
-           {-1, 8, -1},
-           {-1, -1, -1}
+           {0, 1, 0},
+           {1, -4, 1},
+           {0, 1, 1}
    };
    
    public static final int[][] IDENTITY_KERNEL = new int[][]{
