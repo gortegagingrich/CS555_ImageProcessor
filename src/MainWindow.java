@@ -212,20 +212,34 @@ class MainWindow extends JFrame {
       
       JMenuItem laplacianFilter = new JMenuItem("Laplacian");
       laplacianFilter.addActionListener(l -> {
-         filters.add(x -> Assignment2.convol(x, Assignment2.LAPLACIAN_KERNEL, 1,
-                                             1));
+         filters.add(x -> Assignment2.convol(x, Assignment2.LAPLACIAN_KERNEL,
+                                             -1));
          applyFilters();
       });
       convolutionMenu.add(laplacianFilter);
-      
-      JMenu sharpenMenu = new JMenu("sharpen");
-      
-      JMenuItem laplacianSharpen = new JMenuItem("Laplacian");
+   
+      JMenu filterMenu = new JMenu("filters");
+   
+      JMenuItem laplacianSharpen = new JMenuItem("sharpening Laplacian");
       laplacianSharpen.addActionListener(l -> {
          filters.add(x -> Assignment2.laplacianSharpen(x));
          applyFilters();
       });
-      sharpenMenu.add(laplacianSharpen);
+      filterMenu.add(laplacianSharpen);
+   
+      JMenuItem medianFilter = new JMenuItem("median filter");
+      medianFilter.addActionListener(l -> {
+         filters.add(x -> Assignment2.medianFilter(x, 7));
+         applyFilters();
+      });
+      filterMenu.add(medianFilter);
+   
+      JMenuItem avgFilter = new JMenuItem("smooth");
+      avgFilter.addActionListener(l -> {
+         filters.add(x -> Assignment2.smooth(x, 3));
+         applyFilters();
+      });
+      filterMenu.add(avgFilter);
       
       JMenuItem histogramEqualize = new JMenuItem("equalize histogram");
       histogramEqualize.addActionListener(l -> {
@@ -235,7 +249,7 @@ class MainWindow extends JFrame {
       edit.add(histogramEqualize);
       
       edit.add(convolutionMenu);
-      edit.add(sharpenMenu);
+      edit.add(filterMenu);
    }
    
    private void setTestActions() {
@@ -296,7 +310,6 @@ class MainWindow extends JFrame {
       JOptionPane.showMessageDialog(this, panel);
       
       for (int i = 0; i < 8; i++) {
-         System.out.println(boxes[i].isEnabled());
          planes |= boxes[i].isSelected() ? 1 << i : 0;
       }
       

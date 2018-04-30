@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -5,9 +6,9 @@ import java.util.HashMap;
  */
 public class Assignment2 {
    public static final int[][] LAPLACIAN_KERNEL = new int[][]{
-           {-1, -1, -1},
-           {-1, 8, -1},
-           {-1, -1, -1}
+           {1, 1, 1},
+           {1, -8, 1},
+           {1, 1, 1}
    };
    
    public static final int[][] IDENTITY_KERNEL = new int[][]{
@@ -17,7 +18,7 @@ public class Assignment2 {
    };
    
    public static int[][] globalHE(int[][] img) {
-      double[] sourceValCounts = new double[256 >> (8 - MainWindow.bitDepth)];
+      double[] sourceValCounts = new double[(255 >> (8 - MainWindow.bitDepth)) + 1];
       
       // count grayscale values
       for (int i = 0; i < img.length; i++) {
@@ -78,55 +79,31 @@ public class Assignment2 {
    }
    
    public static int[][] laplacianSharpen(int[][] img) {
-      int[][] filteredImage = convol(img, generateLaplaceKernel(3), 1, 1);
+      // apply laplacian filter to image
+      int[][] filteredImage = convol(img, LAPLACIAN_KERNEL, -1);
       
-      int max, min;
-      max = Integer.MIN_VALUE;
-      min = Integer.MAX_VALUE;
+      // normalize filtered image
+      filteredImage = normalize(filteredImage, 255);
       
+      // add filter to image
       for (int i = 0; i < img.length; i++) {
          for (int j = 0; j < img[i].length; j++) {
-            img[i][j] += filteredImage[i][j];
-            
-            if (img[i][j] < min) {
-               min = img[i][j];
-            }
+            filteredImage[i][j] += img[i][j];
          }
       }
       
-      for (int i = 0; i < img.length; i++) {
-         for (int j = 0; j < img[i].length; j++) {
-            img[i][j] -= min;
-            
-            if (img[i][j] > max) {
-               max = img[i][j];
-            }
-         }
-      }
+      // normalize filtered image
+      filteredImage = normalize(filteredImage, 255);
       
-      min = 0xFF;
-      
-      for (int i = 0; i < img.length; i++) {
-         for (int j = 0; j < img[i].length; j++) {
-            img[i][j] = (int) (img[i][j] * 255.0 / max);
-            
-            if (img[i][j] < min) {
-               min = img[i][j];
-            }
-         }
-      }
-      
-      return img;
+      return filteredImage;
    }
    
    /**
     * @param img
     * @param kernel
-    * @param cx     x position of center of kernel
-    * @param cy     y position of center of kernel
     * @return
     */
-   public static int[][] convol(int[][] img, int[][] kernel, int cx, int cy) {
+   public static int[][] convol(int[][] img, int[][] kernel, double c) {
       int accumulator;
       int[][] out;
       int x, y;
@@ -136,23 +113,9 @@ public class Assignment2 {
       // needs to create a new matrix
       out = new int[img.length][img[0].length];
       
-      for (int i = cx; i < img.length - cx; i++) {
-         for (int j = cy; j < img[i].length - cy; j++) {
-            accumulator = 0;
-            
-            for (int m = 0; m < kernel.length; m++) {
-               for (int n = 0; n < kernel[m].length; n++) {
-                  // find corresponding pixel in image
-                  x = m - cx + i;
-                  y = n - cy + j;
-                  
-                  // determine if it's a valid pixel
-                  if (x > -1 && x < img.length
-                          && y > -1 && y < img[x].length) {
-                     accumulator += img[x][y] * kernel[m][n];
-                  }
-               }
-            }
+      for (int i = 0; i < img.length; i++) {
+         for (int j = 0; j < img[i].length; j++) {
+            accumulator = applyKernel(img, kernel, i, j, c);
             
             if (accumulator > max) {
                max = accumulator;
@@ -166,29 +129,104 @@ public class Assignment2 {
          }
       }
       
-      // fix grayscale values
-      double range = max - min;
+      return out;
+   }
+   
+   /**
+    * @param img
+    * @param kernel
+    * @param x      pixel x position in image
+    * @param y      pixel y position in image
+    * @return
+    */
+   private static int applyKernel(int[][] img, int[][] kernel, int x, int y, double c) {
+      int accumulator = 0;
+      int xx = x - kernel.length / 2;
+      int yy = y - kernel[0].length / 2;
+      
+      for (int i = 0; i < kernel.length; i++) {
+         for (int j = 0; j < kernel[i].length; j++) {
+            // if in bounds for image
+            if (xx + i > -1 && xx + i < img.length && yy + j > -1 && yy + j < img[xx + i].length) {
+               accumulator += c * kernel[i][j] * img[xx + i][yy + j];
+            }
+         }
+      }
+      
+      return accumulator;
+   }
+   
+   private static int[][] normalize(int[][] img, int upperBound) {
+      int max = Integer.MIN_VALUE;
+      int min = Integer.MAX_VALUE;
+      
+      // find max and min
+      for (int i = 0; i < img.length; i++) {
+         for (int j = 0; j < img[i].length; j++) {
+            if (img[i][j] > max) {
+               max = img[i][j];
+            }
+            
+            if (img[i][j] < min) {
+               min = img[i][j];
+            }
+         }
+      }
+      
+      // use max and min to normalize
+      for (int i = 0; i < img.length; i++) {
+         for (int j = 0; j < img[i].length; j++) {
+            img[i][j] = (int) ((img[i][j] - min) * ((double) (upperBound) / (max)));
+         }
+      }
+      
+      return img;
+   }
+   
+   public static int[][] medianFilter(int[][] img, int size) {
+      int[][] out = new int[img.length][img[0].length];
       
       for (int i = 0; i < out.length; i++) {
          for (int j = 0; j < out[i].length; j++) {
-            out[i][j] = (int) ((out[i][j] - min) * 255.0 / range);
+            out[i][j] = findMedian(img, i, j, size);
          }
       }
       
       return out;
    }
    
-   public static int[][] generateLaplaceKernel(int size) {
-      int[][] kernel = new int[size][size];
+   private static int findMedian(int[][] img, int x, int y, int size) {
+      int med = 0, xx, yy;
+      int[] acc = new int[size * size];
       
       for (int i = 0; i < size; i++) {
          for (int j = 0; j < size; j++) {
-            kernel[i][j] = -1;
+            xx = x + i - size / 2;
+            yy = y + j - size / 2;
+            
+            if (xx > -1 && xx < img.length && yy > -1 && yy < img[0].length) {
+               acc[med++] = img[xx][yy];
+            }
          }
       }
       
-      kernel[size / 2][size / 2] = size * size - 1;
+      Arrays.sort(acc);
+      med = Math.max(0, size * size / 2);
       
-      return kernel;
+      return acc[med];
+   }
+   
+   public static int[][] smooth(int[][] img, int size) {
+      // initialize kernel to all 1's
+      int[][] kernel = new int[size][size];
+      
+      for (int[] row : kernel) {
+         for (int i = 0; i < row.length; i++) {
+            row[i] = 1;
+         }
+      }
+      
+      // convol with kernel and coefficient based on size to find local average
+      return convol(img, kernel, 1.0 / (size * size));
    }
 }

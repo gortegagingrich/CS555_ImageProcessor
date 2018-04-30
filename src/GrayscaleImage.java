@@ -83,10 +83,6 @@ class GrayscaleImage {
       if (img.getHeight() != 0 && img.getWidth() != 0) {
          pixels = new int[img.getWidth()][img.getHeight()];
          
-         if (img.getHeight() == 511) {
-            System.out.println("idk");
-         }
-         
          for (int i = 0; i < pixels.length; i++) {
             for (int j = 0; j < pixels[i].length; j++) {
                // assume image is grayscale (r==g && g == b)
