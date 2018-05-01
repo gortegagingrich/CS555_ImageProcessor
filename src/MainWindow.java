@@ -222,21 +222,24 @@ class MainWindow extends JFrame {
    
       JMenuItem laplacianSharpen = new JMenuItem("sharpening Laplacian");
       laplacianSharpen.addActionListener(l -> {
-         filters.add(x -> Assignment2.laplacianSharpen(x));
+         int size = showIntOption(3);
+         filters.add(x -> Assignment2.laplacianSharpen(x,size));
          applyFilters();
       });
       filterMenu.add(laplacianSharpen);
    
       JMenuItem medianFilter = new JMenuItem("median filter");
       medianFilter.addActionListener(l -> {
-         filters.add(x -> Assignment2.medianFilter(x, 7));
+         int size = showIntOption(3);
+         filters.add(x -> Assignment2.medianFilter(x, size));
          applyFilters();
       });
       filterMenu.add(medianFilter);
    
       JMenuItem avgFilter = new JMenuItem("smooth");
       avgFilter.addActionListener(l -> {
-         filters.add(x -> Assignment2.smooth(x, 3));
+         int size = showIntOption(3);
+         filters.add(x -> Assignment2.smooth(x, size));
          applyFilters();
       });
       filterMenu.add(avgFilter);
@@ -344,5 +347,18 @@ class MainWindow extends JFrame {
                          Integer.parseInt(h.getText())));
          applyFilters();
       }
+   }
+
+   private int showIntOption(int def) {
+      JSpinner spinner = new JSpinner();
+      spinner.getModel().setValue(def);
+
+      int result = JOptionPane.showConfirmDialog(this,spinner);
+
+      if (result == JOptionPane.OK_OPTION) {
+         def = Math.max(1,(Integer)spinner.getValue());
+      }
+
+      return def;
    }
 }

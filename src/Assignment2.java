@@ -78,9 +78,9 @@ public class Assignment2 {
       return img;
    }
    
-   public static int[][] laplacianSharpen(int[][] img) {
+   public static int[][] laplacianSharpen(int[][] img, int size) {
       // apply laplacian filter to image
-      int[][] filteredImage = convol(img, LAPLACIAN_KERNEL, -1);
+      int[][] filteredImage = convol(img, generateLaplacian(size), -1);
       
       // normalize filtered image
       filteredImage = normalize(filteredImage, 255);
@@ -140,7 +140,7 @@ public class Assignment2 {
     * @return
     */
    private static int applyKernel(int[][] img, int[][] kernel, int x, int y, double c) {
-      int accumulator = 0;
+      double accumulator = 0;
       int xx = x - kernel.length / 2;
       int yy = y - kernel[0].length / 2;
       
@@ -153,7 +153,7 @@ public class Assignment2 {
          }
       }
       
-      return accumulator;
+      return (int)accumulator;
    }
    
    private static int[][] normalize(int[][] img, int upperBound) {
@@ -228,5 +228,18 @@ public class Assignment2 {
       
       // convol with kernel and coefficient based on size to find local average
       return convol(img, kernel, 1.0 / (size * size));
+   }
+
+   public static int[][] generateLaplacian(int size) {
+      int[][] kernel = new int[size][size];
+      int center = size/2;
+
+      for (int i = 0; i < size; i++) {
+         for (int j = 0; j < size; j++) {
+            kernel[i][j] = (i == j && i == center) ? -1 * (size * size - 1) : 1;
+         }
+      }
+
+      return kernel;
    }
 }
