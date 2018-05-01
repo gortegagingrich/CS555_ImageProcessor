@@ -1,21 +1,12 @@
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 /**
  * Created by gabriel on 4/17/18.
  */
 public class Assignment2 {
-   public static final int[][] LAPLACIAN_KERNEL = new int[][]{
-           {1, 1, 1},
-           {1, -8, 1},
-           {1, 1, 1}
-   };
-   
-   public static final int[][] IDENTITY_KERNEL = new int[][]{
-           {0, 0, 0},
-           {0, 1, 0},
-           {0, 0, 0}
-   };
    
    public static int[][] globalHE(int[][] img) {
       double[] sourceValCounts = new double[(255 >> (8 - MainWindow.bitDepth)) + 1];
@@ -50,20 +41,77 @@ public class Assignment2 {
    
    public static int[][] localHE(int[][] img, int n) {
       int[][] out = new int[img.length][img[0].length];
-      
-      for (int i = 0; i < img.length - n; i++) {
-         for (int j = 0; j < img[i].length - n; j++) {
-            out[i][j] = localHEHelper(img, i, j, n);
+   
+      for (int i = 0; i < img.length; i++) {
+         for (int j = 0; j < img[i].length; j++) {
+            out[i][j] = localHEHelper(img, i - n / 2, j - n / 2, n);
          }
       }
       
       return out;
    }
    
+   /**
+    * For the defined region, calculates an equalized histogram and returns
+    * the converted value for the center pixel.
+    *
+    * @param img
+    * @param x
+    * @param y
+    * @param n
+    * @return
+    */
    private static int localHEHelper(int[][] img, int x, int y, int n) {
-      HashMap<Integer, Integer> hist = new HashMap<>(); // using a map to reduce size
+      // <gray value, count>
+      // using a map to reduce size due to needing to create the set MxN times
+      HashMap<Integer, Double> hist = new HashMap<>();
+      int count = 0;
       
-      return img[x + n / 2][y + n / 2];
+      // count values
+      for (int i = x; i < x + n; i++) {
+         for (int j = y; j < y + n; j++) {
+            
+            // if it's a valid position in the image
+            if (i > -1 && i < img.length && j > -1 && j < img[i].length) {
+               // keep a running count of valid pixels
+               // should usually be n*n in the end
+               count++;
+               
+               int val = img[i][j];
+               
+               if (hist.containsKey(val)) {
+                  hist.replace(val, hist.get(val) + 1);
+               } else {
+                  hist.put(val, 1.0);
+               }
+            }
+         }
+      }
+      
+      // make get sorted entries
+      Object[] entries = hist.entrySet()
+              .stream()
+              .sorted(Comparator.comparingInt(Entry::getKey)).toArray();
+      
+      double sum = 0;
+      
+      // determine what new gray level should be mapped to the original values
+      for (Object e : entries) {
+         sum += ((Entry<Integer, Double>) e).getValue();
+         ((Entry<Integer, Double>) e).setValue(
+                 sum / count * (0xFF >> (8 - MainWindow.bitDepth)));
+      }
+      
+      // print histogram
+      //hist.forEach((i, j) -> System.out.printf("%d: %d\n", i, j));
+      
+      int i = 0;
+      
+      while (((Entry<Integer, Double>) entries[i]).getKey() != img[x + n / 2][y + n / 2]) {
+         i += 1;
+      }
+      
+      return ((Entry<Integer, Double>) entries[i]).getValue().intValue();
    }
    
    public static int[][] setBitPlanes(int[][] img, int planes) {
@@ -132,28 +180,17 @@ public class Assignment2 {
       return out;
    }
    
-   /**
-    * @param img
-    * @param kernel
-    * @param x      pixel x position in image
-    * @param y      pixel y position in image
-    * @return
-    */
-   private static int applyKernel(int[][] img, int[][] kernel, int x, int y, double c) {
-      double accumulator = 0;
-      int xx = x - kernel.length / 2;
-      int yy = y - kernel[0].length / 2;
+   public static int[][] generateLaplacian(int size) {
+      int[][] kernel = new int[size][size];
+      int center = size / 2;
       
-      for (int i = 0; i < kernel.length; i++) {
-         for (int j = 0; j < kernel[i].length; j++) {
-            // if in bounds for image
-            if (xx + i > -1 && xx + i < img.length && yy + j > -1 && yy + j < img[xx + i].length) {
-               accumulator += c * kernel[i][j] * img[xx + i][yy + j];
-            }
+      for (int i = 0; i < size; i++) {
+         for (int j = 0; j < size; j++) {
+            kernel[i][j] = (i == j && i == center) ? -1 * (size * size - 1) : 1;
          }
       }
       
-      return (int)accumulator;
+      return kernel;
    }
    
    private static int[][] normalize(int[][] img, int upperBound) {
@@ -176,11 +213,35 @@ public class Assignment2 {
       // use max and min to normalize
       for (int i = 0; i < img.length; i++) {
          for (int j = 0; j < img[i].length; j++) {
-            img[i][j] = (int) ((img[i][j] - min) * ((double) (upperBound) / (max)));
+            img[i][j] = (int) ((img[i][j] - min) * ((double) (upperBound) / (max - min)));
          }
       }
       
       return img;
+   }
+   
+   /**
+    * @param img
+    * @param kernel
+    * @param x      pixel x position in image
+    * @param y      pixel y position in image
+    * @return
+    */
+   private static int applyKernel(int[][] img, int[][] kernel, int x, int y, double c) {
+      double accumulator = 0;
+      int xx = x - kernel.length / 2;
+      int yy = y - kernel[0].length / 2;
+      
+      for (int i = 0; i < kernel.length; i++) {
+         for (int j = 0; j < kernel[i].length; j++) {
+            // if in bounds for image
+            if (xx + i > -1 && xx + i < img.length && yy + j > -1 && yy + j < img[xx + i].length) {
+               accumulator += c * kernel[i][j] * img[xx + i][yy + j];
+            }
+         }
+      }
+      
+      return (int) accumulator;
    }
    
    public static int[][] medianFilter(int[][] img, int size) {
@@ -216,6 +277,25 @@ public class Assignment2 {
       return acc[med];
    }
    
+   public static int[][] highBoostingFilter(int[][] img, int size) {
+      // blur image
+      int[][] filtered = smooth(img, size);
+      
+      // subtract from original to get mask
+      for (int i = 0; i < img.length; i++) {
+         for (int j = 0; j < img[i].length; j++) {
+            // subtract from original to get mask
+            filtered[i][j] = img[i][j] - filtered[i][j];
+            // add mask back to original
+            img[i][j] += filtered[i][j];
+         }
+      }
+      
+      img = normalize(img, 0xFF >> (MainWindow.bitDepth - 8));
+      
+      return img;
+   }
+   
    public static int[][] smooth(int[][] img, int size) {
       // initialize kernel to all 1's
       int[][] kernel = new int[size][size];
@@ -228,18 +308,5 @@ public class Assignment2 {
       
       // convol with kernel and coefficient based on size to find local average
       return convol(img, kernel, 1.0 / (size * size));
-   }
-
-   public static int[][] generateLaplacian(int size) {
-      int[][] kernel = new int[size][size];
-      int center = size/2;
-
-      for (int i = 0; i < size; i++) {
-         for (int j = 0; j < size; j++) {
-            kernel[i][j] = (i == j && i == center) ? -1 * (size * size - 1) : 1;
-         }
-      }
-
-      return kernel;
    }
 }

@@ -105,31 +105,6 @@ class Assignment1 {
    }
    
    /**
-    * Spatially scales matrix of pixels first with horizontal
-    * linear interpolation and then with vertical linear
-    * interpolation.
-    *
-    * @param img    input matrix of pixels
-    * @param width  output width
-    * @param height output height
-    * @return spatially scaled matrix of pixels
-    */
-   static int[][] bilinearInterp(int[][] img, int width, int height) {
-      // ensure output image is 1x1 or larger
-      width = Math.max(width, 1);
-      height = Math.max(height, 1);
-      
-      // perform linear interpolation horizontally and then vertically
-      int[][] h = new int[width][img[0].length];
-      int[][] v = new int[width][height];
-      
-      horizontalLinearInterp(img, h);
-      verticalLinearInterp(h, v);
-      
-      return v;
-   }
-   
-   /**
     * linearly interpolate looking at pixels in the row
     *
     * @param in  input matrix of pixels
@@ -208,5 +183,30 @@ class Assignment1 {
                                 + (1 - dy1 / (dy0 + dy1)) * (in[x][(int) y1]));
          }
       }
+   }
+   
+   /**
+    * Spatially scales matrix of pixels first with horizontal
+    * linear interpolation and then with vertical linear
+    * interpolation.
+    *
+    * @param img    input matrix of pixels
+    * @param width  output width
+    * @param height output height
+    * @return spatially scaled matrix of pixels
+    */
+   static int[][] bilinearInterp(int[][] img, int width, int height) {
+      // ensure output image is 1x1 or larger
+      width = Math.max(width, 1);
+      height = Math.max(height, 1);
+      
+      // perform linear interpolation horizontally and then vertically
+      int[][] h = new int[width][img[0].length];
+      int[][] v = new int[width][height];
+      
+      horizontalLinearInterp(img, h);
+      verticalLinearInterp(h, v);
+      
+      return v;
    }
 }

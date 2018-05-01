@@ -17,15 +17,12 @@ import java.util.Vector;
 import java.util.function.Function;
 
 class MainWindow extends JFrame {
+   public static int bitDepth = 8;
+   private final Vector<Function<int[][], int[][]>> filters;
    private JScrollPane inputPane, outputPane;
    private JLabel inputLabel, outputLabel;
-   
    private BufferedImage inputImage;
    private BufferedImage outputImage;
-   
-   public static int bitDepth = 8;
-   
-   private final Vector<Function<int[][], int[][]>> filters;
    
    MainWindow() {
       // set title
@@ -51,10 +48,6 @@ class MainWindow extends JFrame {
       setVisible(true);
    }
    
-   private void updateOutputImage() {
-      outputLabel.setIcon(new ImageIcon(outputImage));
-   }
-   
    private void initComponents() {
       // setup picture display
       inputLabel = new JLabel(new ImageIcon(inputImage));
@@ -68,33 +61,27 @@ class MainWindow extends JFrame {
       
       add(inputPane);
       add(outputPane);
-
+   
       // setup menus
       JMenuBar menuBar = new JMenuBar();
-
-      // button for hard coded test actions
-      JMenuItem updateButton = new JMenuItem("test actions");
-      updateButton.addActionListener(l -> setTestActions());
-      updateButton.setAccelerator(KeyStroke.getKeyStroke("F5"));
-
+   
       // reading image from file
       JMenu file = new JMenu("file");
       JMenuItem loadButton = new JMenuItem("Load Image");
       loadButton.addActionListener(l -> loadImage());
       file.add(loadButton);
-
+   
       // edit menu
       JMenu edit = new JMenu("edit");
    
       addAssignment1(edit);
       addAssignment2(edit);
-
+   
       // allow for clearing all filters
       JMenuItem clear = new JMenuItem("clear");
       clear.addActionListener(l -> clearFilters());
       
       edit.add(new JSeparator());
-      edit.add(updateButton);
       edit.add(clear);
       
       menuBar.add(file);
@@ -208,22 +195,12 @@ class MainWindow extends JFrame {
       toggleBitPlanes.addActionListener(this::selectBitPlanes);
       edit.add(toggleBitPlanes);
       
-      JMenu convolutionMenu = new JMenu("convol");
-      
-      JMenuItem laplacianFilter = new JMenuItem("Laplacian");
-      laplacianFilter.addActionListener(l -> {
-         filters.add(x -> Assignment2.convol(x, Assignment2.LAPLACIAN_KERNEL,
-                                             -1));
-         applyFilters();
-      });
-      convolutionMenu.add(laplacianFilter);
-   
       JMenu filterMenu = new JMenu("filters");
    
       JMenuItem laplacianSharpen = new JMenuItem("sharpening Laplacian");
       laplacianSharpen.addActionListener(l -> {
          int size = showIntOption(3);
-         filters.add(x -> Assignment2.laplacianSharpen(x,size));
+         filters.add(x -> Assignment2.laplacianSharpen(x, size));
          applyFilters();
       });
       filterMenu.add(laplacianSharpen);
@@ -236,40 +213,41 @@ class MainWindow extends JFrame {
       });
       filterMenu.add(medianFilter);
    
-      JMenuItem avgFilter = new JMenuItem("smooth");
+      JMenuItem avgFilter = new JMenuItem("smoothing filter");
       avgFilter.addActionListener(l -> {
          int size = showIntOption(3);
          filters.add(x -> Assignment2.smooth(x, size));
          applyFilters();
       });
       filterMenu.add(avgFilter);
-      
-      JMenuItem histogramEqualize = new JMenuItem("equalize histogram");
-      histogramEqualize.addActionListener(l -> {
+   
+      JMenuItem highBoosting = new JMenuItem("high-boosting filter");
+      highBoosting.addActionListener(l -> {
+         int size = showIntOption(3);
+         filters.add(x -> Assignment2.highBoostingFilter(x, size));
+         applyFilters();
+      });
+      filterMenu.add(highBoosting);
+   
+      JMenu histEQ = new JMenu("histogram equalization");
+   
+      JMenuItem globalHEQ = new JMenuItem("global");
+      globalHEQ.addActionListener(l -> {
          filters.add(x -> Assignment2.globalHE(x));
          applyFilters();
       });
-      edit.add(histogramEqualize);
-      
-      edit.add(convolutionMenu);
+      histEQ.add(globalHEQ);
+   
+      JMenuItem localHEQ = new JMenuItem("local");
+      localHEQ.addActionListener(l -> {
+         int size = showIntOption(3);
+         filters.add(x -> Assignment2.localHE(x, size));
+         applyFilters();
+      });
+      histEQ.add(localHEQ);
+   
+      edit.add(histEQ);
       edit.add(filterMenu);
-   }
-   
-   private void setTestActions() {
-      filters.clear();
-      filters.addAll(new Vector<Function<int[][], int[][]>>() {{
-         add(x -> Assignment2.localHE(x, 3));
-      }});
-      
-      applyFilters();
-   }
-   
-   private void applyFilters() {
-      bitDepth = 8;
-      Function<int[][], int[][]>[] fs = new Function[filters.size()];
-      filters.toArray(fs);
-      outputImage = new GrayscaleImage(inputImage).apply(fs).toImage();
-      updateOutputImage();
    }
    
    private void loadImage() {
@@ -322,6 +300,18 @@ class MainWindow extends JFrame {
       applyFilters();
    }
    
+   private void applyFilters() {
+      bitDepth = 8;
+      Function<int[][], int[][]>[] fs = new Function[filters.size()];
+      filters.toArray(fs);
+      outputImage = new GrayscaleImage(inputImage).apply(fs).toImage();
+      updateOutputImage();
+   }
+   
+   private void updateOutputImage() {
+      outputLabel.setIcon(new ImageIcon(outputImage));
+   }
+   
    private void scaleBilinear(ActionEvent l) {
       JTextField w, h;
       JLabel wl, hl;
@@ -348,17 +338,17 @@ class MainWindow extends JFrame {
          applyFilters();
       }
    }
-
+   
    private int showIntOption(int def) {
       JSpinner spinner = new JSpinner();
       spinner.getModel().setValue(def);
-
-      int result = JOptionPane.showConfirmDialog(this,spinner);
-
+      
+      int result = JOptionPane.showConfirmDialog(this, spinner);
+      
       if (result == JOptionPane.OK_OPTION) {
-         def = Math.max(1,(Integer)spinner.getValue());
+         def = Math.max(1, (Integer) spinner.getValue());
       }
-
+      
       return def;
    }
 }
