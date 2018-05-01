@@ -1,8 +1,7 @@
 /*
  * Name: Gabriel Ortega-Gingrich
- * Assignment: Homework 1
- * Description: Implementation of several basic algorithms for changing spatial
- * and gray-scale resolution
+ * Assignment: Homework 2
+ * Description: Implementation of several basic algorithms spatial filters
  */
 
 import javax.swing.*;

@@ -1,8 +1,7 @@
 /*
  * Name: Gabriel Ortega-Gingrich
- * Assignment: Homework 1
- * Description: Implementation of several basic algorithms for changing spatial
- * and gray-scale resolution
+ * Assignment: Homework 2
+ * Description: Implementation of several basic algorithms spatial filters
  */
 
 import javax.imageio.ImageIO;
@@ -88,7 +87,12 @@ class MainWindow extends JFrame {
       menuBar.add(edit);
       setJMenuBar(menuBar);
    }
-   
+
+   /**
+    * Adds filters required for first submission to given JMenu
+    *
+    * @param edit Menu filters are to be selected from
+    */
    private void addAssignment1(JMenu edit) {
       // add submenus
       JMenu scale = new JMenu("resolution");
@@ -189,67 +193,79 @@ class MainWindow extends JFrame {
       
       scale.add(grayscale);
    }
-   
+
+   /**
+    * Adds filters required for submission 2 to given JMenu
+    * @param edit Menu filters are to be selected from
+    */
    private void addAssignment2(JMenu edit) {
+      // deactivate selected bitplanes
       JMenuItem toggleBitPlanes = new JMenuItem("Toggle bitplanes");
-      toggleBitPlanes.addActionListener(this::selectBitPlanes);
+      toggleBitPlanes.addActionListener(this::bitPlanesAction);
       edit.add(toggleBitPlanes);
       
       JMenu filterMenu = new JMenu("filters");
-   
+
+      // sharpening filter with laplacian kernel of chosen size
       JMenuItem laplacianSharpen = new JMenuItem("sharpening Laplacian");
       laplacianSharpen.addActionListener(l -> {
-         int size = showIntOption(3);
+         int size = showIntOption("Size of local region: ",3);
          filters.add(x -> Assignment2.laplacianSharpen(x, size));
          applyFilters();
       });
       filterMenu.add(laplacianSharpen);
-   
+
+      // median filter with selectable local region size
       JMenuItem medianFilter = new JMenuItem("median filter");
       medianFilter.addActionListener(l -> {
-         int size = showIntOption(3);
+         int size = showIntOption("Size of local region: ",3);
          filters.add(x -> Assignment2.medianFilter(x, size));
          applyFilters();
       });
       filterMenu.add(medianFilter);
-   
+
+      // smoothing filter using local means of given region size
       JMenuItem avgFilter = new JMenuItem("smoothing filter");
       avgFilter.addActionListener(l -> {
-         int size = showIntOption(3);
+         int size = showIntOption("Size of local region: ",3);
          filters.add(x -> Assignment2.smooth(x, size));
          applyFilters();
       });
       filterMenu.add(avgFilter);
-   
+
+      // high boosting filter with given region size and value for A
       JMenuItem highBoosting = new JMenuItem("high-boosting filter");
-      highBoosting.addActionListener(l -> {
-         int size = showIntOption(3);
-         filters.add(x -> Assignment2.highBoostingFilter(x, size));
-         applyFilters();
-      });
+      highBoosting.addActionListener(this::highBoostAction);
       filterMenu.add(highBoosting);
-   
+
+      // menu for histogram equalization
       JMenu histEQ = new JMenu("histogram equalization");
-   
+
+      // global histogram equalization
       JMenuItem globalHEQ = new JMenuItem("global");
       globalHEQ.addActionListener(l -> {
          filters.add(x -> Assignment2.globalHE(x));
          applyFilters();
       });
       histEQ.add(globalHEQ);
-   
+
+      // local histogram equalization with selectable local size
       JMenuItem localHEQ = new JMenuItem("local");
       localHEQ.addActionListener(l -> {
-         int size = showIntOption(3);
+         int size = showIntOption("Size of local region: ",3);
          filters.add(x -> Assignment2.localHE(x, size));
          applyFilters();
       });
       histEQ.add(localHEQ);
-   
+
       edit.add(histEQ);
       edit.add(filterMenu);
    }
-   
+
+    /**
+     * Opens a jfilechooser to let user select image file to be processed.
+     * Does not clear current filters once it is loaded.
+     */
    private void loadImage() {
       File f;
       JFileChooser jfc = new JFileChooser(System.getProperty("user.dir"));
@@ -268,20 +284,29 @@ class MainWindow extends JFrame {
       
       applyFilters();
    }
-   
+
+    /**
+     * Clears current filters and updates output image.
+     */
    private void clearFilters() {
       filters.clear();
       bitDepth = 8;
       applyFilters();
    }
-   
-   private void selectBitPlanes(ActionEvent l) {
+
+    /**
+     * Called when menuitem for disabling bit planes is selected
+     *
+     * @param l action event not used
+     */
+   private void bitPlanesAction(ActionEvent l) {
       JPanel panel = new JPanel();
       JCheckBox[] boxes = new JCheckBox[8];
       int planes = 0;
       
-      panel.setLayout(new GridLayout(8, 1));
-      
+      panel.setLayout(new GridLayout(1, 8));
+
+      // add checkboxes for each bit (assume 8 total)
       for (int i = 0; i < 8; i++) {
          boxes[i] = new JCheckBox(String.format("%d", i));
          boxes[i].setSelected(true);
@@ -299,7 +324,10 @@ class MainWindow extends JFrame {
       filters.add(x -> Assignment2.setBitPlanes(x, p));
       applyFilters();
    }
-   
+
+    /**
+     * iteratively applies filters to image and displays output
+     */
    private void applyFilters() {
       bitDepth = 8;
       Function<int[][], int[][]>[] fs = new Function[filters.size()];
@@ -307,11 +335,20 @@ class MainWindow extends JFrame {
       outputImage = new GrayscaleImage(inputImage).apply(fs).toImage();
       updateOutputImage();
    }
-   
+
+    /**
+     * updates output image
+     */
    private void updateOutputImage() {
       outputLabel.setIcon(new ImageIcon(outputImage));
    }
-   
+
+    /**
+     * Event for bilinear scaling
+     * Lets user choose output resolution
+     *
+     * @param l actionevent not used
+     */
    private void scaleBilinear(ActionEvent l) {
       JTextField w, h;
       JLabel wl, hl;
@@ -338,12 +375,25 @@ class MainWindow extends JFrame {
          applyFilters();
       }
    }
-   
-   private int showIntOption(int def) {
+
+    /**
+     * Helper class for getting single integer input
+     *
+     * @param desc Text description for spinner
+     * @param def Default value of spinner
+     * @return selected value
+     */
+   private int showIntOption(String desc, int def) {
+       JPanel panel = new JPanel();
+       panel.setLayout(new GridLayout(1,2));
+
       JSpinner spinner = new JSpinner();
       spinner.getModel().setValue(def);
+
+      panel.add(new JLabel(desc));
+      panel.add(spinner);
       
-      int result = JOptionPane.showConfirmDialog(this, spinner);
+      int result = JOptionPane.showConfirmDialog(this, panel);
       
       if (result == JOptionPane.OK_OPTION) {
          def = Math.max(1, (Integer) spinner.getValue());
@@ -351,4 +401,38 @@ class MainWindow extends JFrame {
       
       return def;
    }
+
+    /**
+     * Called when menu item for high-boost filter is pressed.
+     * Gets values for size and a.  Then adds Function to filters
+     *
+     * @param l action event not used
+     */
+    private void highBoostAction(ActionEvent l) {
+        final int size, a;
+
+        // value for local region size
+        JSpinner spinner = new JSpinner();
+        spinner.getModel().setValue(3); // default is 3x3
+
+        // value for A
+        JSpinner spinner2 = new JSpinner();
+        spinner2.getModel().setValue(3); // default A is 3
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(2, 2));
+        panel.add(new JLabel("Region Size: "));
+        panel.add(spinner);
+        panel.add(new JLabel("A: "));
+        panel.add(spinner2);
+
+        int result = JOptionPane.showConfirmDialog(this, panel);
+
+        if (result == JOptionPane.OK_OPTION) {
+            size = Math.max(1, (Integer) spinner.getValue());
+            a = Math.max(1, (Integer) spinner.getValue());
+            filters.add(x -> Assignment2.highBoostingFilter(x, size, a));
+            applyFilters();
+        }
+    }
 }
