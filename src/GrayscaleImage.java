@@ -1,7 +1,7 @@
 /*
  * Name: Gabriel Ortega-Gingrich
  * Assignment: Homework 2
- * Description: Implementation of several basic algorithms spatial filters
+ * Description: Implementation of several basic spatial filters
  */
 
 import java.awt.image.BufferedImage;

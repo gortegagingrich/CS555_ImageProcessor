@@ -1,7 +1,7 @@
 /*
  * Name: Gabriel Ortega-Gingrich
  * Assignment: Homework 2
- * Description: Implementation of several basic algorithms spatial filters
+ * Description: Implementation of several basic spatial filters
  */
 
 import java.util.Arrays;
@@ -13,14 +13,14 @@ import java.util.Map.Entry;
  * Created by gabriel on 4/17/18.
  */
 public class Assignment2 {
-
-    /**
-     * Performs global histogram equalization.
-     * Modifies and returns passed matrix of pixels.
-     *
-     * @param img matrix of pixels representing image
-     * @return Modified img
-     */
+   
+   /**
+    * Performs global histogram equalization.
+    * Modifies and returns passed matrix of pixels.
+    *
+    * @param img matrix of pixels representing image
+    * @return Modified img
+    */
    public static int[][] globalHE(int[][] img) {
       double[] sourceValCounts = new double[(255 >> (8 - MainWindow.bitDepth)) + 1];
       
@@ -51,15 +51,15 @@ public class Assignment2 {
       
       return img;
    }
-
-    /**
-     * Performs local histogram equalization on image.
-     * Does not modify original matrix of pixels
-     *
-     * @param img matrix of pixels representing image
-     * @param n size of local region
-     * @return new matrix of pixels
-     */
+   
+   /**
+    * Performs local histogram equalization on image.
+    * Does not modify original matrix of pixels
+    *
+    * @param img matrix of pixels representing image
+    * @param n   size of local region
+    * @return new matrix of pixels
+    */
    public static int[][] localHE(int[][] img, int n) {
       int[][] out = new int[img.length][img[0].length];
    
@@ -77,9 +77,9 @@ public class Assignment2 {
     * the converted value for the center pixel.
     *
     * @param img matrix of pixels representing image
-    * @param x x-position of top left pixel of region
-    * @param y y-position of top left pixel of region
-    * @param n region size
+    * @param x   x-position of top left pixel of region
+    * @param y   y-position of top left pixel of region
+    * @param n   region size
     * @return new value for center pixel
     */
    private static int localHEHelper(int[][] img, int x, int y, int n) {
@@ -134,15 +134,15 @@ public class Assignment2 {
       
       return ((Entry<Integer, Double>) entries[i]).getValue().intValue();
    }
-
-    /**
-     * Disables bitplanes using bitwise AND.
-     * Modifies image passed to function.
-     *
-     * @param img matrix of pixels representing image
-     * @param planes mask used to disable bitplanes
-     * @return updated original matrix
-     */
+   
+   /**
+    * Disables bitplanes using bitwise AND.
+    * Modifies image passed to function.
+    *
+    * @param img    matrix of pixels representing image
+    * @param planes mask used to disable bitplanes
+    * @return updated original matrix
+    */
    public static int[][] setBitPlanes(int[][] img, int planes) {
       int i, j;
       
@@ -154,15 +154,15 @@ public class Assignment2 {
       
       return img;
    }
-
-    /**
-     * Sharpening filter using Laplacian kernel.
-     * Does not modify original matrix of pixels.
-     *
-     * @param img matrix of pixels representing image
-     * @param size size of laplacian kernel
-     * @return Filtered matrix of pixels
-     */
+   
+   /**
+    * Sharpening filter using Laplacian kernel.
+    * Does not modify original matrix of pixels.
+    *
+    * @param img  matrix of pixels representing image
+    * @param size size of laplacian kernel
+    * @return Filtered matrix of pixels
+    */
    public static int[][] laplacianSharpen(int[][] img, int size) {
       // apply laplacian filter to image
       int[][] filteredImage = convol(img, generateLaplacian(size), -1);
@@ -187,7 +187,7 @@ public class Assignment2 {
     * Performs convolution on given image with given kernel and constant c.
     * Does not modify original matrix of pixels.
     *
-    * @param img matrix of pixels representing image
+    * @param img    matrix of pixels representing image
     * @param kernel kernel used to convol image
     * @return new matrix of pixels with convolution performed
     */
@@ -219,14 +219,14 @@ public class Assignment2 {
       
       return out;
    }
-
-    /**
-     * Generates simple Laplacian kernel.
-     * Of the form: {{1,1,1},{1,-8,1},{1,1,1}}
-     *
-     * @param size
-     * @return
-     */
+   
+   /**
+    * Generates simple Laplacian kernel.
+    * Of the form: {{1,1,1},{1,-8,1},{1,1,1}}
+    *
+    * @param size
+    * @return
+    */
    public static int[][] generateLaplacian(int size) {
       int[][] kernel = new int[size][size];
       int center = size / 2;
@@ -239,15 +239,15 @@ public class Assignment2 {
       
       return kernel;
    }
-
-    /**
-     * Normalizes gray-levels in given image
-     * Modifies matrix passed to function.
-     *
-     * @param img Matrix of pixels representing image
-     * @param upperBound Max value of output (normally 0xFF)
-     * @return Normalized original matrix of pixels
-     */
+   
+   /**
+    * Normalizes gray-levels in given image
+    * Modifies matrix passed to function.
+    *
+    * @param img        Matrix of pixels representing image
+    * @param upperBound Max value of output (normally 0xFF)
+    * @return Normalized original matrix of pixels
+    */
    private static int[][] normalize(int[][] img, int upperBound) {
       int max = Integer.MIN_VALUE;
       int min = Integer.MAX_VALUE;
@@ -278,7 +278,7 @@ public class Assignment2 {
    /**
     * Gets center value when kernel is applied to a pixel in an image.
     *
-    * @param img Matrix of pixels representing image
+    * @param img    Matrix of pixels representing image
     * @param kernel Kernel used for operation
     * @param x      x position of pixel in img
     * @param y      y position of pixel in img
@@ -300,16 +300,16 @@ public class Assignment2 {
       
       return (int) accumulator;
    }
-
-    /**
-     * Median filter.
-     * Each pixel in output image is the median of local region in original.
-     * Does not modify original img
-     *
-     * @param img Matrix of pixels representing image
-     * @param size size of local region
-     * @return new Matrix of pixels representing filtered image
-     */
+   
+   /**
+    * Median filter.
+    * Each pixel in output image is the median of local region in original.
+    * Does not modify original img
+    *
+    * @param img  Matrix of pixels representing image
+    * @param size size of local region
+    * @return new Matrix of pixels representing filtered image
+    */
    public static int[][] medianFilter(int[][] img, int size) {
       int[][] out = new int[img.length][img[0].length];
       
@@ -321,16 +321,16 @@ public class Assignment2 {
       
       return out;
    }
-
-    /**
-     * Finds median value of a local region.
-     *
-     * @param img Matrix of pixels representing image
-     * @param x x position of center pixel of region
-     * @param y y position of center pixel of region
-     * @param size size of local region
-     * @return median value of local region
-     */
+   
+   /**
+    * Finds median value of a local region.
+    *
+    * @param img  Matrix of pixels representing image
+    * @param x    x position of center pixel of region
+    * @param y    y position of center pixel of region
+    * @param size size of local region
+    * @return median value of local region
+    */
    private static int findMedian(int[][] img, int x, int y, int size) {
       int med = 0, xx, yy;
       int[] acc = new int[size * size];
@@ -351,16 +351,16 @@ public class Assignment2 {
       
       return acc[med];
    }
-
-    /**
-     * Performs high-boost filtering on image.
-     * Modifies original matrix of pixels passed to function.
-     *
-     * @param img Matrix of pixels representing image
-     * @param size size of local region used for smoothing
-     * @param a coefficient multiplied with mask (unsharp filter if a==1)
-     * @return filtered img
-     */
+   
+   /**
+    * Performs high-boost filtering on image.
+    * Modifies original matrix of pixels passed to function.
+    *
+    * @param img  Matrix of pixels representing image
+    * @param size size of local region used for smoothing
+    * @param a    coefficient multiplied with mask (unsharp filter if a==1)
+    * @return filtered img
+    */
    public static int[][] highBoostingFilter(int[][] img, int size, int a) {
       // blur image
       int[][] filtered = smooth(img, size);
@@ -379,15 +379,15 @@ public class Assignment2 {
       
       return img;
    }
-
-    /**
-     * Smoothing filter using local mean.
-     * Does not modify original matrix of pixels.
-     *
-     * @param img Matrix of pixels representing image
-     * @param size size of local region
-     * @return new image convoled with kernel of 1s
-     */
+   
+   /**
+    * Smoothing filter using local mean.
+    * Does not modify original matrix of pixels.
+    *
+    * @param img  Matrix of pixels representing image
+    * @param size size of local region
+    * @return new image convoled with kernel of 1s
+    */
    public static int[][] smooth(int[][] img, int size) {
       // initialize kernel to all 1's
       int[][] kernel = new int[size][size];
