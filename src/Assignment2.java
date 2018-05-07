@@ -5,7 +5,6 @@
  */
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -65,7 +64,7 @@ public class Assignment2 {
    
       for (int i = 0; i < img.length; i++) {
          for (int j = 0; j < img[i].length; j++) {
-            out[i][j] = localHEHelper(img, i - n / 2, j - n / 2, n);
+            out[i][j] = localHEHelper(img, i, j, n / 2);
          }
       }
       
@@ -77,62 +76,41 @@ public class Assignment2 {
     * the converted value for the center pixel.
     *
     * @param img matrix of pixels representing image
-    * @param x   x-position of top left pixel of region
-    * @param y   y-position of top left pixel of region
-    * @param n   region size
+    * @param x   x-position of center pixel of region
+    * @param y   y-position of center pixel of region
+    * @param n   region size / 2
     * @return new value for center pixel
     */
    private static int localHEHelper(int[][] img, int x, int y, int n) {
-      // <gray value, count>
-      // using a map to reduce size due to needing to create the set MxN times
-      HashMap<Integer, Double> hist = new HashMap<>();
-      int count = 0;
-      
-      // count values
-      for (int i = x; i < x + n; i++) {
-         for (int j = y; j < y + n; j++) {
-            
-            // if it's a valid position in the image
-            if (i > -1 && i < img.length && j > -1 && j < img[i].length) {
-               // keep a running count of valid pixels
-               // should usually be n*n in the end
-               count++;
-               
-               int val = img[i][j];
-               
-               if (hist.containsKey(val)) {
-                  hist.replace(val, hist.get(val) + 1);
-               } else {
-                  hist.put(val, 1.0);
-               }
+      HashMap<Integer, Integer> hist = new HashMap<>();
+   
+      // find bounds of local region
+      int x0 = Math.max(0, x - n);
+      int y0 = Math.max(0, y - n);
+      int x1 = Math.min(img.length - 1, x + n);
+      int y1 = Math.min(img[0].length - 1, y + n);
+   
+      // populate histogram
+      for (int i = x0; i <= x1; i++) {
+         for (int j = y0; j <= y1; j++) {
+         
+            if (hist.containsKey(img[i][j])) {
+               hist.replace(img[i][j], hist.get(img[i][j]) + 1);
+            } else {
+               hist.put(img[i][j], 1);
             }
          }
       }
-      
-      // make get sorted entries
-      Object[] entries = hist.entrySet()
-              .stream()
-              .sorted(Comparator.comparingInt(Entry::getKey)).toArray();
-      
-      double sum = 0;
-      
-      // determine what new gray level should be mapped to the original values
-      for (Object e : entries) {
-         sum += ((Entry<Integer, Double>) e).getValue();
-         ((Entry<Integer, Double>) e).setValue(
-                 sum / count * (0xFF >> (8 - MainWindow.bitDepth)));
+   
+      int sum = 0;
+   
+      for (Entry<Integer, Integer> e : hist.entrySet()) {
+         sum += e.getValue();
+         e.setValue(sum);
       }
-      
-      // print histogram
-      //hist.forEach((i, j) -> System.out.printf("%d: %d\n", i, j));
-      
-      int i = 0;
-      
-      while (((Entry<Integer, Double>) entries[i]).getKey() != img[x + n / 2][y + n / 2]) {
-         i += 1;
-      }
-      
-      return ((Entry<Integer, Double>) entries[i]).getValue().intValue();
+   
+      return (int) (hist.get(
+              img[x][y]).doubleValue() / ((x1 - x0 + 1) * (y1 - y0 + 1)) * 255.0);
    }
    
    /**

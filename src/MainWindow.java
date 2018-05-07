@@ -29,7 +29,7 @@ class MainWindow extends JFrame {
       setLayout(new GridLayout(1, 2));
       
       try {
-         File f = new File("lena.jpg");
+         File f = new File("test.jpg");
          inputImage = ImageIO.read(f);
          outputImage = ImageIO.read(f);
       } catch (IOException e) {
