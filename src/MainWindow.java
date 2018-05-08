@@ -295,6 +295,51 @@ class MainWindow extends JFrame {
          applyFilters();
       });
       edit.add(harmFilter);
+
+      // contraharmonic mean
+      JMenuItem contraHarmonicMeanFilter = new JMenuItem("contraharmonic mean");
+      contraHarmonicMeanFilter.addActionListener(l -> {
+         int size = showIntOption("Size of local region: ", 3);
+         filters.add(x -> Assignment3.contraHarmonicMeanFilter(x,size));
+         applyFilters();
+      });
+      edit.add(contraHarmonicMeanFilter);
+
+      // max filter
+      JMenuItem maxFilter = new JMenuItem("max");
+      maxFilter.addActionListener(l -> {
+         int size = showIntOption("Size of local region: ", 3);
+         filters.add(x -> Assignment3.maxFilter(x,size));
+         applyFilters();
+      });
+      edit.add(maxFilter);
+
+      // min filter
+      JMenuItem minFilter = new JMenuItem("min");
+      minFilter.addActionListener(l -> {
+         int size = showIntOption("Size of local region: ", 3);
+         filters.add(x -> Assignment3.minFilter(x, size));
+         applyFilters();
+      });
+      edit.add(minFilter);
+
+      // midpiont filter
+      JMenuItem midpointFilter = new JMenuItem("midpoint");
+      midpointFilter.addActionListener(l -> {
+         int size = showIntOption("Size of local region: ", 3);
+         filters.add(x -> Assignment3.midpointFilter(x, size));
+         applyFilters();
+      });
+      edit.add(midpointFilter);
+
+      // alpha-trimmed mean filter
+      JMenuItem atMeanFilter = new JMenuItem("alpha-trimmed mean");
+      atMeanFilter.addActionListener(l -> {
+         int size = showIntOption("Size of local region: ", 3);
+         filters.add(x -> Assignment3.alphaTrimmedMeanFilter(x,size));
+         applyFilters();
+      });
+      edit.add(atMeanFilter);
    }
    
    /**
