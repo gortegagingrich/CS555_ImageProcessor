@@ -75,11 +75,15 @@ class MainWindow extends JFrame {
    
       addAssignment1(edit);
       addAssignment2(edit);
+
+      JMenu assignment3Filters = new JMenu("Assignment 3 filters");
+      addAssignment3(assignment3Filters);
+      edit.add(assignment3Filters);
    
       // allow for clearing all filters
       JMenuItem clear = new JMenuItem("clear");
       clear.addActionListener(l -> clearFilters());
-      
+
       edit.add(new JSeparator());
       edit.add(clear);
       
@@ -261,6 +265,36 @@ class MainWindow extends JFrame {
    
       edit.add(histEQ);
       edit.add(filterMenu);
+   }
+
+   private void addAssignment3(JMenu edit) {
+
+      // arithmetic mean
+      JMenuItem avgFilter = new JMenuItem("arithmetic mean");
+      avgFilter.addActionListener(l -> {
+         int size = showIntOption("Size of local region: ", 3);
+         filters.add(x -> Assignment3.arithMeanFilter(x, size));
+         applyFilters();
+      });
+      edit.add(avgFilter);
+
+      // geometric mean
+      JMenuItem geoFilter = new JMenuItem("geometric mean");
+      geoFilter.addActionListener(l -> {
+         int size = showIntOption("Size of local region: ", 3);
+         filters.add(x -> Assignment3.geomMeanFilter(x,size));
+         applyFilters();
+      });
+      edit.add(geoFilter);
+
+      // harmonic mean
+      JMenuItem harmFilter = new JMenuItem("harmonic mean");
+      harmFilter.addActionListener(l -> {
+         int size = showIntOption("Size of local region: ", 3);
+         filters.add(x -> Assignment3.harmonicMeanFilter(x, size));
+         applyFilters();
+      });
+      edit.add(harmFilter);
    }
    
    /**
