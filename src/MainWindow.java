@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Vector;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 class MainWindow extends JFrame {
@@ -75,7 +76,7 @@ class MainWindow extends JFrame {
    
       addAssignment1(edit);
       addAssignment2(edit);
-
+   
       JMenu assignment3Filters = new JMenu("Assignment 3 filters");
       addAssignment3(assignment3Filters);
       edit.add(assignment3Filters);
@@ -83,7 +84,7 @@ class MainWindow extends JFrame {
       // allow for clearing all filters
       JMenuItem clear = new JMenuItem("clear");
       clear.addActionListener(l -> clearFilters());
-
+   
       edit.add(new JSeparator());
       edit.add(clear);
       
@@ -212,32 +213,17 @@ class MainWindow extends JFrame {
       JMenu filterMenu = new JMenu("filters");
    
       // sharpening filter with laplacian kernel of chosen size
-      JMenuItem laplacianSharpen = new JMenuItem("sharpening Laplacian");
-      laplacianSharpen.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment2.laplacianSharpen(x, size));
-         applyFilters();
-      });
-      filterMenu.add(laplacianSharpen);
-   
+      addFilterItem((a, b) -> Assignment2.laplacianSharpen(a, b),
+                    "sharpening Laplacian", filterMenu);
+      
       // median filter with selectable local region size
-      JMenuItem medianFilter = new JMenuItem("median filter");
-      medianFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment2.medianFilter(x, size));
-         applyFilters();
-      });
-      filterMenu.add(medianFilter);
-   
+      addFilterItem((a, b) -> Assignment2.medianFilter(a, b), "median",
+                    filterMenu);
+      
       // smoothing filter using local means of given region size
-      JMenuItem avgFilter = new JMenuItem("smoothing filter");
-      avgFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment2.smooth(x, size));
-         applyFilters();
-      });
-      filterMenu.add(avgFilter);
-   
+      addFilterItem((a, b) -> Assignment2.smooth(a, b), "smoothing",
+                    filterMenu);
+      
       // high boosting filter with given region size and value for A
       JMenuItem highBoosting = new JMenuItem("high-boosting filter");
       highBoosting.addActionListener(this::highBoostAction);
@@ -255,91 +241,43 @@ class MainWindow extends JFrame {
       histEQ.add(globalHEQ);
    
       // local histogram equalization with selectable local size
-      JMenuItem localHEQ = new JMenuItem("local");
-      localHEQ.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment2.localHE(x, size));
-         applyFilters();
-      });
-      histEQ.add(localHEQ);
-   
+      addFilterItem((a, b) -> Assignment2.localHE(a, b), "local", histEQ);
+      
       edit.add(histEQ);
       edit.add(filterMenu);
    }
-
+   
    private void addAssignment3(JMenu edit) {
-
+      
       // arithmetic mean
-      JMenuItem avgFilter = new JMenuItem("arithmetic mean");
-      avgFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment3.arithMeanFilter(x, size));
-         applyFilters();
-      });
-      edit.add(avgFilter);
-
+      addFilterItem((a, b) -> Assignment3.arithMeanFilter(a, b),
+                    "arithmetic mean", edit);
+      
       // geometric mean
-      JMenuItem geoFilter = new JMenuItem("geometric mean");
-      geoFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment3.geomMeanFilter(x,size));
-         applyFilters();
-      });
-      edit.add(geoFilter);
-
+      addFilterItem((a, b) -> Assignment3.geomMeanFilter(a, b),
+                    "geometric mean", edit);
+      
       // harmonic mean
-      JMenuItem harmFilter = new JMenuItem("harmonic mean");
-      harmFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment3.harmonicMeanFilter(x, size));
-         applyFilters();
-      });
-      edit.add(harmFilter);
-
+      addFilterItem((a, b) -> Assignment3.harmonicMeanFilter(a, b),
+                    "harmonic mean", edit);
+      
       // contraharmonic mean
-      JMenuItem contraHarmonicMeanFilter = new JMenuItem("contraharmonic mean");
-      contraHarmonicMeanFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment3.contraHarmonicMeanFilter(x,size));
-         applyFilters();
-      });
-      edit.add(contraHarmonicMeanFilter);
-
+      addFilterItem((a, b) -> Assignment3.contraharmonicMeanFilter(a, b),
+                    "contraharmonic mean", edit);
+      
       // max filter
-      JMenuItem maxFilter = new JMenuItem("max");
-      maxFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment3.maxFilter(x,size));
-         applyFilters();
-      });
-      edit.add(maxFilter);
-
+      addFilterItem((a, b) -> Assignment3.maxFilter(a, b), "max", edit);
+      
       // min filter
-      JMenuItem minFilter = new JMenuItem("min");
-      minFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment3.minFilter(x, size));
-         applyFilters();
-      });
-      edit.add(minFilter);
-
+      addFilterItem((a, b) -> Assignment3.minFilter(a, b), "min", edit);
+      
       // midpiont filter
-      JMenuItem midpointFilter = new JMenuItem("midpoint");
-      midpointFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment3.midpointFilter(x, size));
-         applyFilters();
-      });
-      edit.add(midpointFilter);
-
+      addFilterItem((a, b) -> Assignment3.midpointFilter(a, b), "midpoint",
+                    edit);
+      
       // alpha-trimmed mean filter
-      JMenuItem atMeanFilter = new JMenuItem("alpha-trimmed mean");
-      atMeanFilter.addActionListener(l -> {
-         int size = showIntOption("Size of local region: ", 3);
-         filters.add(x -> Assignment3.alphaTrimmedMeanFilter(x,size));
-         applyFilters();
-      });
-      edit.add(atMeanFilter);
+      addFilterItem((a, b) -> Assignment3.alphaTrimmedMeanFilter(a, b),
+                    "alpha-trimmed mean", edit);
    }
    
    /**
@@ -514,5 +452,17 @@ class MainWindow extends JFrame {
          filters.add(x -> Assignment2.highBoostingFilter(x, size, a));
          applyFilters();
       }
+   }
+   
+   private void addFilterItem(BiFunction<int[][], Integer, int[][]> f, String label, JMenu menu) {
+      JMenuItem item = new JMenuItem(label);
+      item.addActionListener(l -> addFilterWithSize(f));
+      menu.add(item);
+   }
+   
+   private void addFilterWithSize(BiFunction<int[][], Integer, int[][]> f) {
+      final int size = showIntOption("Size of local region: ", 3);
+      filters.add(x -> f.apply(x, size));
+      applyFilters();
    }
 }
