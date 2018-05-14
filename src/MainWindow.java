@@ -19,6 +19,7 @@ import java.util.function.Function;
 class MainWindow extends JFrame {
    public static int bitDepth = 8;
    private final Vector<Function<int[][], int[][]>> filters;
+   private int lastFilter;
    private JScrollPane inputPane, outputPane;
    private JLabel inputLabel, outputLabel;
    private BufferedImage inputImage;
@@ -38,6 +39,7 @@ class MainWindow extends JFrame {
       }
       
       filters = new Vector<>();
+      lastFilter = 0;
       
       initComponents();
       
@@ -93,6 +95,44 @@ class MainWindow extends JFrame {
       setJMenuBar(menuBar);
    }
    
+   private void genericAddScale(JMenu menu, String name, ScaleFunction<int[][], int[][], Integer, Integer> fn) {
+      // make panel with spinners for output width and height
+      // make menu item
+      JMenuItem item = new JMenuItem(name);
+      
+      // action listener for menu item
+      item.addActionListener(l -> {
+         JPanel panel;
+         JSpinner w, h;
+         JLabel wl, hl;
+         int res;
+         
+         panel = new JPanel();
+         panel.setLayout(new GridLayout(2, 2));
+         wl = new JLabel("width: ");
+         hl = new JLabel("height: ");
+         w = new JSpinner();
+         w.getModel().setValue(outputImage.getWidth());
+         h = new JSpinner();
+         h.getModel().setValue(outputImage.getHeight());
+         panel.add(wl);
+         panel.add(w);
+         panel.add(hl);
+         panel.add(h);
+         
+         // check if
+         res = JOptionPane.showConfirmDialog(this, panel);
+         
+         if (res == JOptionPane.OK_OPTION) {
+            filters.add(x -> fn.apply(x, (Integer) w.getValue(),
+                                      (Integer) h.getValue()));
+            applyFilters();
+         }
+      });
+      
+      menu.add(item);
+   }
+   
    /**
     * Adds filters required for first submission to given JMenu
     *
@@ -105,39 +145,11 @@ class MainWindow extends JFrame {
       JMenu grayscale = new JMenu("gray-scale");
       
       // menu item for nearest neighbor spatial scaling
-      JMenuItem nearestNeighbor = new JMenuItem("Nearest Neighbor");
-      nearestNeighbor.addActionListener(l -> {
-         JTextField w, h;
-         JLabel wl, hl;
-         w = new JTextField(String.format("%d", outputImage.getWidth()));
-         h = new JTextField(String.format("%d", outputImage.getHeight()));
-         wl = new JLabel("width");
-         hl = new JLabel("height");
-         w.setColumns(5);
-         h.setColumns(5);
-         
-         JOptionPane.showMessageDialog(this, new JPanel() {{
-            setLayout(new FlowLayout());
-            add(wl);
-            add(w);
-            add(hl);
-            add(h);
-         }});
-         
-         if (w.getText().length() != 0 && h.getText().length() != 0) {
-            filters.add(x -> Assignment1.scaleNearestNeighbor(x,
-                                                              Integer.parseInt(
-                                                                      w.getText()),
-                                                              Integer.parseInt(
-                                                                      h.getText())));
-            applyFilters();
-         }
-         ;
-      });
-      spatial.add(nearestNeighbor);
+      genericAddScale(spatial, "nearest neighbor",
+                      (a, b, c) -> Assignment1.scaleNearestNeighbor(a, b, c));
       
       // menu item for spatial scaling with linear interpolation
-      JMenuItem linearInterpolation = new JMenuItem("Linear Interpolation");
+      JMenuItem linearInterpolation = new JMenuItem("linear interpolation");
       linearInterpolation.addActionListener(l -> {
          JTextField w, h;
          JLabel wl, hl;
@@ -177,9 +189,8 @@ class MainWindow extends JFrame {
       spatial.add(linearInterpolation);
       
       // menu item for scaling by bilinear interpolation
-      JMenuItem bilinearInterp = new JMenuItem("Bilinear Interpolation");
-      bilinearInterp.addActionListener(this::scaleBilinear);
-      spatial.add(bilinearInterp);
+      genericAddScale(spatial, "bilinear interpolation",
+                      Assignment1::bilinearInterp);
       
       scale.add(spatial);
       edit.add(scale);
@@ -347,10 +358,17 @@ class MainWindow extends JFrame {
     * iteratively applies filters to image and displays output
     */
    private void applyFilters() {
-      bitDepth = 8;
-      Function<int[][], int[][]>[] fs = new Function[filters.size()];
-      filters.toArray(fs);
-      outputImage = new GrayscaleImage(inputImage).apply(fs).toImage();
+      // filter was added
+      if (filters.size() > lastFilter) {
+         outputImage = new GrayscaleImage(outputImage).apply(
+                 filters.get(lastFilter++)).toImage();
+      } else { // filter at least one filter was removed
+         lastFilter = filters.size();
+         bitDepth = 8;
+         Function<int[][], int[][]>[] fs = new Function[filters.size()];
+         filters.toArray(fs);
+         outputImage = new GrayscaleImage(inputImage).apply(fs).toImage();
+      }
       updateOutputImage();
    }
    
@@ -359,39 +377,6 @@ class MainWindow extends JFrame {
     */
    private void updateOutputImage() {
       outputLabel.setIcon(new ImageIcon(outputImage));
-   }
-   
-   /**
-    * Event for bilinear scaling
-    * Lets user choose output resolution
-    *
-    * @param l actionevent not used
-    */
-   private void scaleBilinear(ActionEvent l) {
-      JTextField w, h;
-      JLabel wl, hl;
-      w = new JTextField(String.format("%d", outputImage.getWidth()));
-      h = new JTextField(String.format("%d", outputImage.getHeight()));
-      wl = new JLabel("width");
-      hl = new JLabel("height");
-      w.setColumns(5);
-      h.setColumns(5);
-      
-      JOptionPane.showMessageDialog(this, new JPanel() {{
-         add(wl);
-         add(w);
-         add(hl);
-         add(h);
-      }});
-      
-      if (w.getText().length() != 0 && h.getText().length() != 0) {
-         filters.add(x -> Assignment1
-                 .bilinearInterp(
-                         x,
-                         Integer.parseInt(w.getText()),
-                         Integer.parseInt(h.getText())));
-         applyFilters();
-      }
    }
    
    /**

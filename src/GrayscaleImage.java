@@ -7,7 +7,7 @@
 import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
-class GrayscaleImage {
+class GrayscaleImage implements Image {
    // I'm using ints to avoid having to cast to bytes
    private int[][] pixels;
    private int width;
@@ -33,8 +33,7 @@ class GrayscaleImage {
     * @param actions filters to apply
     * @return self after filters are applied
     */
-   @SafeVarargs
-   final GrayscaleImage apply(Function<int[][], int[][]>... actions) {
+   public GrayscaleImage apply(Function<int[][], int[][]>... actions) {
       for (Function f : actions) {
          //noinspection unchecked
          pixels = (int[][]) f.apply(pixels);
@@ -76,8 +75,9 @@ class GrayscaleImage {
     * @param img source image
     * @return matrix of pixels
     */
-   private static int[][] readBufferedImage(BufferedImage img) {
+   static int[][] readBufferedImage(BufferedImage img) {
       int[][] pixels;
+      int r, g, b;
       
       if (img.getHeight() != 0 && img.getWidth() != 0) {
          pixels = new int[img.getWidth()][img.getHeight()];
@@ -85,7 +85,11 @@ class GrayscaleImage {
          for (int i = 0; i < pixels.length; i++) {
             for (int j = 0; j < pixels[i].length; j++) {
                // assume image is grayscale (r==g && g == b)
-               pixels[i][j] = img.getRGB(i, j) & 0xFF;
+               b = img.getRGB(i, j);
+               r = (b & 0xFF0000) >> 16;
+               g = (b & 0xFF00) >> 8;
+               b = b & 0xFF;
+               pixels[i][j] = (r + g + b) / 3;
             }
          }
       } else {
