@@ -367,7 +367,13 @@ class MainWindow extends JFrame {
          bitDepth = 8;
          Function<int[][], int[][]>[] fs = new Function[filters.size()];
          filters.toArray(fs);
-         outputImage = new GrayscaleImage(inputImage).apply(fs).toImage();
+         GrayscaleImage img = new GrayscaleImage(inputImage);
+   
+         for (Function<int[][], int[][]> f : fs) {
+            img = img.apply(f);
+         }
+   
+         outputImage = img.toImage();
       }
       updateOutputImage();
    }

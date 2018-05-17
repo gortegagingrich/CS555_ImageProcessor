@@ -7,7 +7,7 @@
 import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
-class GrayscaleImage implements Image {
+class GrayscaleImage {
    // I'm using ints to avoid having to cast to bytes
    private int[][] pixels;
    private int width;
@@ -30,16 +30,13 @@ class GrayscaleImage implements Image {
     * Applies given filters in order.
     * Returns self just to make chaining for tests easier.
     *
-    * @param actions filters to apply
+    * @param f filter to apply
     * @return self after filters are applied
     */
-   public GrayscaleImage apply(Function<int[][], int[][]>... actions) {
-      for (Function f : actions) {
-         //noinspection unchecked
-         pixels = (int[][]) f.apply(pixels);
-         width = pixels.length;
-         height = pixels[0].length;
-      }
+   public GrayscaleImage apply(Function<int[][], int[][]> f) {
+      pixels = (int[][]) f.apply(pixels);
+      width = pixels.length;
+      height = pixels[0].length;
       
       return this;
    }
