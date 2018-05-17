@@ -45,18 +45,17 @@ public class MultiChannelWindow extends JFrame {
 }
 
 class TabbedLayers extends JTabbedPane {
-   MultiChannelImage image;
+   GenericImage image;
    JScrollPane[] panes;
    ImageIcon[] icons;
-   GenericImage gImage;
    
    public TabbedLayers(BufferedImage img) {
-      image = new MultiChannelImage(img, MultiChannelImage.HSV);
-      gImage = new GenericImage(img,
+      image = new GenericImage(img,
               x -> Color.HSBtoRGB(x[0], x[1], x[2]),
               x -> Color.RGBtoHSB(x[0],x[1],x[2],null), 3);
+      image.apply(x -> FloatFilters.mean(x,2), 2);
       
-      BufferedImage[] images = gImage.getChannels(255);
+      BufferedImage[] images = image.getChannels(255);
       panes = new JScrollPane[images.length + 1];
       icons = new ImageIcon[panes.length];
       
@@ -70,7 +69,7 @@ class TabbedLayers extends JTabbedPane {
       
       // first tab is recomposed image
       panes[i] = new JScrollPane(new JLabel(new ImageIcon(
-              gImage.toImage())));
+              image.toImage())));
       addTab("recomposed", panes[i]);
       panes[2].add(new PopupMenu());
    }
