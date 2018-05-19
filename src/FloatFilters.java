@@ -19,6 +19,47 @@ public class FloatFilters {
 
         return out;
     }
+   
+   public static float[][] guided(float[][] guide, float[][] img, int r, float eps) {
+      // based on Xuanwu Yin's c++ implementation
+      // original: https://github.com/scimg/GuidedFilter/blob/master/GuidedFilter/GuidedFilter/GuidedFilter.cpp
+      
+      float[][] meanB, meanP, bgr;
+      
+      bgr = img;
+      meanB = mean(guide, r);
+      meanP = mean(img, r);
+      
+      // covariance of (guide, image)
+      
+      float[][] covBP, covGP, covRP;
+      float[][] tmpBP, meanBP;
+      
+      tmpBP = Util.mul(bgr, img);
+      meanBP = mean(tmpBP, r);
+      tmpBP = Util.mul(meanB, meanP);
+      covBP = Util.sub(meanBP, tmpBP);
+      
+      // variance of guide
+      float[][] varBB;
+      float[][] tmpBB, meanBB;
+      
+      tmpBB = Util.mul(bgr, bgr);
+      meanBB = mean(tmpBB, r);
+      tmpBB = Util.mul(meanB, meanB);
+      varBB = Util.sub(meanBB, tmpBB);
+      
+      // a and b
+      float[][] Ab, B, Abb, BB;
+      
+      varBB = Util.add(varBB, eps);
+      Ab = Util.div(covBP, varBB);
+      Abb = mean(Ab, r);
+      
+      Ab = Util.mul(Abb, bgr);
+      
+      return Util.add(Ab, meanP);
+   }
 
     private static float convol(float[][] img, float[][] kernel, int x, int y) {
         float sum = 0;
@@ -33,4 +74,23 @@ public class FloatFilters {
 
         return sum;
     }
+   
+   private static float[][] normalize(float[][] img) {
+      float max;
+      
+      max = img[0][0];
+      
+      for (float[] r : img) {
+         for (float f : r) {
+            
+            if (f > max) {
+               max = f;
+            }
+         }
+      }
+      
+      System.out.println(max);
+      
+      return Util.mul(img, 1f / max);
+   }
 }

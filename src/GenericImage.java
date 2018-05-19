@@ -1,17 +1,13 @@
-import javafx.util.Pair;
-
 import java.awt.image.BufferedImage;
-import java.security.KeyPair;
 import java.util.function.Function;
 
 public class GenericImage {
     private Function<float[], Integer> p2RGB;
-    private Function<int[], float[]> rgb2P;
     private float[][][] channels;
     private int height, width, channelCount;
 
     public GenericImage(BufferedImage img, Function<float[], Integer> p2r, Function<int[], float[]> r2p, int channelCount) {
-        rgb2P = r2p;
+        Function<int[], float[]> rgb2P = r2p;
         p2RGB = p2r;
 
         width = img.getWidth();
