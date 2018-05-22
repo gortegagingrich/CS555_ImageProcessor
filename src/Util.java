@@ -17,6 +17,10 @@ public class Util {
       return binaryMatrixOperation(a, b, (x, y) -> x / y);
    }
    
+   public static float[][] div(final float a, float[][] b) {
+      return binaryMatrixOperation(b, null, (x, y) -> a / x);
+   }
+   
    public static float[][] add(float[][] a, final float c) {
       return binaryMatrixOperation(a, null, (x, y) -> x + c);
    }
