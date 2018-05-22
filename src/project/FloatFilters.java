@@ -1,4 +1,4 @@
-import Jama.Matrix;
+package project;
 
 import java.util.Arrays;
 
@@ -66,55 +66,6 @@ public class FloatFilters {
    }
    
    public float[][] wls(float[][] in, float lambda, float alpha, float[][] l) {
-      float smallNum = 0.0001f;
-      int r, c, k;
-      r = in.length;
-      c = in[0].length;
-      k = r * c;
-      
-      double[][] inDouble, lDouble;
-      
-      inDouble = new double[r][c];
-      lDouble = new double[r][c];
-      
-      Matrix IN = new Matrix(inDouble);
-      Matrix L = new Matrix(lDouble);
-      
-      // compute affinities
-      float[][] dyMat;
-      float[] dy;
-      dyMat = diff(l, 1, 1);
-      float[][] temp0 = pow(dyMat, alpha);
-      temp0 = Util.add(temp0, smallNum);
-      dyMat = Util.div(-lambda, temp0);
-      dyMat = padMatrix(dyMat, 0, 1, false);
-      dy = flatten(dyMat);
-      
-      float[][] dxMat;
-      float[] dx;
-      dxMat = diff(l, 1, 2);
-      temp0 = pow(dxMat, alpha);
-      temp0 = Util.add(temp0, smallNum);
-      dxMat = Util.div(-lambda, temp0);
-      dxMat = padMatrix(dxMat, 1, 0, false);
-      dx = flatten(dxMat);
-      
-      // construct 5-point spatially inhomogeneous laplacian matrix
-      float[][] B = new float[2][];
-      B[0] = dx;
-      B[1] = dy;
-      int[] d = new int[]{-r, -1};
-      Matrix A = spdiags(B, d, k, k);
-      
-      float[] e = dx;
-      float[] w = padArray(dx, r, true);
-      w = Arrays.copyOfRange(w, 0, w.length - r - 1);
-      float[] s = dy;
-      float[] n = padArray(dy, 1, true);
-      n = Arrays.copyOfRange(n, 0, n.length - 2);
-      
-      // D = 1 - (e + w + s + n);
-      
       return null;
    }
    
@@ -132,11 +83,6 @@ public class FloatFilters {
       }
       
       return out;
-   }
-   
-   private static Matrix spdiags(float[][] b, int[] d, int k, int k1) {
-      
-      return null;
    }
    
    private float[] flatten(float[][] mat) {

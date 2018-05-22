@@ -287,8 +287,25 @@ class MainWindow extends JFrame {
                     edit);
       
       // alpha-trimmed mean filter
-      addFilterItem((a, b) -> Assignment3.alphaTrimmedMeanFilter(a, b),
-                    "alpha-trimmed mean", edit);
+      JMenuItem atMean = new JMenuItem("alpha-trimmed mean");
+      atMean.addActionListener(l -> {
+         JPanel panel = new JPanel();
+         JSpinner size, d;
+
+         panel.setLayout(new GridLayout(2,2));
+         panel.add(new JLabel("local size:"));
+         panel.add((size = new JSpinner()));
+         panel.add(new JLabel("d:"));
+         panel.add((d = new JSpinner()));
+         size.getModel().setValue(3);
+         d.getModel().setValue(1);
+
+         if (JOptionPane.showConfirmDialog(this,panel) != JOptionPane.CANCEL_OPTION) {
+            filters.add(x -> Assignment3.alphaTrimmedMeanFilter(x,(Integer)size.getValue(),(Integer)d.getValue()));
+            applyFilters();
+         }
+      });
+      edit.add(atMean);
    }
    
    /**
