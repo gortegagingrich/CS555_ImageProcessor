@@ -1,7 +1,7 @@
 /*
  * Name: Gabriel Ortega-Gingrich
- * Assignment: Homework 2
- * Description: Implementation of several basic spatial filters
+ * Assignment: Homework 3
+ * Description: Implementation of several filters for noise reduction
  */
 
 import java.awt.image.BufferedImage;
@@ -24,6 +24,37 @@ class GrayscaleImage {
       width = img.getWidth();
       height = img.getHeight();
       pixels = readBufferedImage(img);
+   }
+   
+   /**
+    * Generates matrix of pixels from given buffered image by reading
+    * values pixel by pixel.
+    *
+    * @param img source image
+    * @return matrix of pixels
+    */
+   static int[][] readBufferedImage(BufferedImage img) {
+      int[][] pixels;
+      int r, g, b;
+      
+      if (img.getHeight() != 0 && img.getWidth() != 0) {
+         pixels = new int[img.getWidth()][img.getHeight()];
+         
+         for (int i = 0; i < pixels.length; i++) {
+            for (int j = 0; j < pixels[i].length; j++) {
+               // assume image is grayscale (r==g && g == b)
+               b = img.getRGB(i, j);
+               r = (b & 0xFF0000) >> 16;
+               g = (b & 0xFF00) >> 8;
+               b = b & 0xFF;
+               pixels[i][j] = (r + g + b) / 3;
+            }
+         }
+      } else {
+         pixels = null;
+      }
+      
+      return pixels;
    }
    
    /**
@@ -63,36 +94,5 @@ class GrayscaleImage {
       }
       
       return out;
-   }
-   
-   /**
-    * Generates matrix of pixels from given buffered image by reading
-    * values pixel by pixel.
-    *
-    * @param img source image
-    * @return matrix of pixels
-    */
-   static int[][] readBufferedImage(BufferedImage img) {
-      int[][] pixels;
-      int r, g, b;
-      
-      if (img.getHeight() != 0 && img.getWidth() != 0) {
-         pixels = new int[img.getWidth()][img.getHeight()];
-         
-         for (int i = 0; i < pixels.length; i++) {
-            for (int j = 0; j < pixels[i].length; j++) {
-               // assume image is grayscale (r==g && g == b)
-               b = img.getRGB(i, j);
-               r = (b & 0xFF0000) >> 16;
-               g = (b & 0xFF00) >> 8;
-               b = b & 0xFF;
-               pixels[i][j] = (r + g + b) / 3;
-            }
-         }
-      } else {
-         pixels = null;
-      }
-      
-      return pixels;
    }
 }

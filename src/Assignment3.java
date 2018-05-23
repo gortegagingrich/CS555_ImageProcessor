@@ -1,3 +1,9 @@
+/*
+ * Name: Gabriel Ortega-Gingrich
+ * Assignment: Homework 3
+ * Description: Implementation of several filters for noise reduction
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BinaryOperator;
@@ -9,7 +15,7 @@ public class Assignment3 {
    /**
     * Smoothing filter that uses arithmetic mean of local region
     *
-    * @param img image to filter
+    * @param img  image to filter
     * @param size size of local region
     * @return filtered image
     */
@@ -22,22 +28,22 @@ public class Assignment3 {
                            // running sum should be initialized to 0
                            0);
    }
-
+   
    /**
     * Generic filter filter that takes operations to perform at certain
     * steps.  This only exists because I got tired of writing out the
     * same set of control structures over and over.
     *
-    * @param img image to filter
-    * @param size size of local region (gets passed to function)
-    * @param inc BinaryOperator that gets called at every pixel in each local
-    *            region.
-    *            The two arguments it takes are an internal double containing
-    *            a running sum, and the value of the current pixel
-    * @param adjust BinaryOperator that gets called after iterating through
-    *               each local region.
-    *               The two arguments it takes are the number of valid pixels
-    *               and the running sum.
+    * @param img      image to filter
+    * @param size     size of local region (gets passed to function)
+    * @param inc      BinaryOperator that gets called at every pixel in each local
+    *                 region.
+    *                 The two arguments it takes are an internal double containing
+    *                 a running sum, and the value of the current pixel
+    * @param adjust   BinaryOperator that gets called after iterating through
+    *                 each local region.
+    *                 The two arguments it takes are the number of valid pixels
+    *                 and the running sum.
     * @param defValue Default value for the running sum
     *                 This will usually be 0, but it can be 1 in some cases
     * @return filtered image
@@ -77,11 +83,11 @@ public class Assignment3 {
       
       return out;
    }
-
+   
    /**
     * Filter that uses the geometric means of local regions
     *
-    * @param img image to filter
+    * @param img  image to filter
     * @param size size of local region
     * @return filtered image
     */
@@ -94,11 +100,11 @@ public class Assignment3 {
                            // running geometric sum should be initialized to 1
                            1);
    }
-
+   
    /**
     * Filter that uses the harmonic mean of local regions.
     *
-    * @param img image to filter
+    * @param img  image to filter
     * @param size size of the local regions
     * @return filtered image
     */
@@ -111,32 +117,32 @@ public class Assignment3 {
                            // running sum should be initialized to 0
                            0);
    }
-
+   
    /**
     * Filter that uses the contraharmonic mean of local regions
     *
-    * @param img image to be filtered
+    * @param img  image to be filtered
     * @param size size of local regions
     * @return filtered image
     */
    public static int[][] contraharmonicMeanFilter(int[][] img, int size) {
       ArrayList<BinaryOperator<Object>> list = new ArrayList<>();
-
+      
       // Needs to keep track of two values
       // first is sum + val^2
-      list.add((a, b) -> (Double)a + (Double)b * (Double)b);
+      list.add((a, b) -> (Double) a + (Double) b * (Double) b);
       // second is sum + val
-      list.add((a, b) -> (Double)a + (Double)b);
+      list.add((a, b) -> (Double) a + (Double) b);
       
       return genericFilter(img, size,
                            list,
                            // final result is the first running "sum"
                            // divided by the second
-                           a -> (Double)a[0] / (Double)a[1],
+                           a -> (Double) a[0] / (Double) a[1],
                            () -> 0.0);
       
    }
-
+   
    /**
     * Different generic filter that allows for multiple functions to be called
     * for each pixel in each local region.
@@ -144,12 +150,12 @@ public class Assignment3 {
     * of BinaryOperators.
     * Structurally similar to other genericFilter method.
     *
-    * @param img image to filter
-    * @param size size of local region
-    * @param step list of BinaryOperators to be applied for each pixel
-    *             in each local region.
-    * @param adjust Function that takes a double[] containing the running
-    *               "sums" corresponding to each BinaryOperator in step.
+    * @param img      image to filter
+    * @param size     size of local region
+    * @param step     list of BinaryOperators to be applied for each pixel
+    *                 in each local region.
+    * @param adjust   Function that takes a double[] containing the running
+    *                 "sums" corresponding to each BinaryOperator in step.
     * @param defValue default value of each running "sum"
     * @return filtered image
     */
@@ -187,11 +193,11 @@ public class Assignment3 {
       
       return out;
    }
-
+   
    /**
     * Filter that uses local maxima
     *
-    * @param img image to be filtered
+    * @param img  image to be filtered
     * @param size size of local regions
     * @return filtered image
     */
@@ -203,11 +209,11 @@ public class Assignment3 {
                            (a, b) -> a,
                            Double.MIN_VALUE);
    }
-
+   
    /**
     * Filter using local minima
     *
-    * @param img image to be filtered
+    * @param img  image to be filtered
     * @param size size of local regions
     * @return filtered image
     */
@@ -219,11 +225,11 @@ public class Assignment3 {
                            (a, b) -> a,
                            Double.MAX_VALUE);
    }
-
+   
    /**
     * Filter using local midpoints
     *
-    * @param img image to be filtered
+    * @param img  image to be filtered
     * @param size size of local region
     * @return filtered image
     */
@@ -231,46 +237,46 @@ public class Assignment3 {
       ArrayList<BinaryOperator<Object>> list = new ArrayList<>();
       
       // first stored value is max
-      list.add((a, b) -> (Double)b > (Double)a ? b : a);
+      list.add((a, b) -> (Double) a > (Double) b && (Double) a != -1.0 ? a : b);
       // second stored value is min
-      list.add((a, b) -> (Double)b < (Double)a ? b : a);
+      list.add((a, b) -> (Double) a < (Double) b && (Double) a != -1.0 ? a : b);
       
       return genericFilter(img, size, list,
                            // final value is midpoint of max and min
-                           x -> ((Double)x[0] + (Double)x[1]) * 0.5,
-              () -> 0.0);
+                           x -> ((Double) x[0] + (Double) x[1]) * 0.5,
+                           () -> -1.0);
    }
-
+   
    /**
     * Filter using local alpha-trimmed means
     *
-    * @param img image to filter
+    * @param img  image to filter
     * @param size size of local region
-    * @param d number of values to trim
+    * @param d    number of values to trim
     * @return
     */
    public static int[][] alphaTrimmedMeanFilter(int[][] img, int size, final int d) {
       ArrayList<BinaryOperator<Object>> list = new ArrayList<>();
       final double localSize = size * size - d;
-
+      
       // add an item to given list
-      list.add((x,a) -> {
-         ((ArrayList<Double>)x).add((Double)a);
+      list.add((x, a) -> {
+         ((ArrayList<Double>) x).add((Double) a);
          return x;
       });
       
       return genericFilter(img, size, list,
                            // sorts list, and finds means of middle values
                            x -> {
-                              ArrayList<Double> l = (ArrayList<Double>)x[0];
+                              ArrayList<Double> l = (ArrayList<Double>) x[0];
                               l.sort(Double::compare);
-                              int d0 = d - d/2;
+                              int d0 = d - d / 2;
                               double sum = 0;
                               for (int i = d0; i < l.size() - (d - d0); i++) {
                                  sum += l.get(i);
                               }
                               return sum / (l.size() - d);
                            },
-              () -> new ArrayList<Double>());
+                           () -> new ArrayList<Double>());
    }
 }

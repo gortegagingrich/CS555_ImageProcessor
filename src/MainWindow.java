@@ -1,7 +1,7 @@
 /*
  * Name: Gabriel Ortega-Gingrich
- * Assignment: Homework 2
- * Description: Implementation of several basic spatial filters
+ * Assignment: Homework 3
+ * Description: Implementation of several filters for noise reduction
  */
 
 import javax.imageio.ImageIO;
@@ -31,7 +31,7 @@ class MainWindow extends JFrame {
       setLayout(new GridLayout(1, 2));
       
       try {
-         File f = new File("test.jpg");
+         File f = new File("lena.jpg");
          inputImage = ImageIO.read(f);
          outputImage = ImageIO.read(f);
       } catch (IOException e) {
@@ -291,17 +291,20 @@ class MainWindow extends JFrame {
       atMean.addActionListener(l -> {
          JPanel panel = new JPanel();
          JSpinner size, d;
-
-         panel.setLayout(new GridLayout(2,2));
+   
+         panel.setLayout(new GridLayout(2, 2));
          panel.add(new JLabel("local size:"));
          panel.add((size = new JSpinner()));
          panel.add(new JLabel("d:"));
          panel.add((d = new JSpinner()));
          size.getModel().setValue(3);
          d.getModel().setValue(1);
-
-         if (JOptionPane.showConfirmDialog(this,panel) != JOptionPane.CANCEL_OPTION) {
-            filters.add(x -> Assignment3.alphaTrimmedMeanFilter(x,(Integer)size.getValue(),(Integer)d.getValue()));
+   
+         if (JOptionPane.showConfirmDialog(this,
+                                           panel) != JOptionPane.CANCEL_OPTION) {
+            filters.add(x -> Assignment3.alphaTrimmedMeanFilter(x,
+                                                                (Integer) size.getValue(),
+                                                                (Integer) d.getValue()));
             applyFilters();
          }
       });

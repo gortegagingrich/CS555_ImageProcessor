@@ -1,7 +1,7 @@
 /*
  * Name: Gabriel Ortega-Gingrich
- * Assignment: Homework 2
- * Description: Implementation of several basic spatial filters
+ * Assignment: Homework 3
+ * Description: Implementation of several filters for noise reduction
  */
 
 import javax.swing.*;

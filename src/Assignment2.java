@@ -93,7 +93,7 @@ public class Assignment2 {
       // populate histogram
       for (int i = x0; i <= x1; i++) {
          for (int j = y0; j <= y1; j++) {
-         
+   
             if (hist.containsKey(img[i][j])) {
                hist.replace(img[i][j], hist.get(img[i][j]) + 1);
             } else {
