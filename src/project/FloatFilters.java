@@ -12,8 +12,8 @@ public class FloatFilters {
       meanP = mean(img, r);
       
       // covariance of (guide, image)
-      
-      float[][] covBP, covGP, covRP;
+   
+      float[][] covBP;
       float[][] tmpBP, meanBP;
       
       tmpBP = Util.mul(bgr, img);

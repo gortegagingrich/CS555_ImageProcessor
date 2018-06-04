@@ -48,10 +48,12 @@ class Assignment1 {
     * @return representation of image with gray-scale resolution changed
     */
    public static int[][] changeBitDepth(int[][] img, int outDepth) {
+      System.out.printf("in depth: %d\nout depth: %d\n", MainWindow.bitDepth,
+                        outDepth);
+      
       for (int i = 0; i < img.length; i++) {
          for (int j = 0; j < img[i].length; j++) {
-            img[i][j] = convertGrayscaleBit(img[i][j], MainWindow.bitDepth,
-                                            outDepth);
+            img[i][j] = convertGrayscaleBit(img[i][j], outDepth);
          }
       }
       
@@ -64,16 +66,16 @@ class Assignment1 {
     * Converts gray-scale resolution of given pixel
     *
     * @param gsIn   input gray-scale value
-    * @param depth0 input gray-scale depth
     * @param depth1 output gray-scale depth
     * @return new gray-scale value
     */
-   private static int convertGrayscaleBit(int gsIn, int depth0, int depth1) {
-      double ratio = (double) gsIn / ((1 << (depth0)) - 1);
-      int max = (1 << depth1) - 1;
-      gsIn = (int) Math.round(ratio * max);
-      
-      return gsIn;
+   private static int convertGrayscaleBit(int gsIn, int depth1) {
+      double ratio = (double) gsIn / (0xFF);
+      int gsout;
+      int max = 0xFF >> (8 - depth1);
+      gsout = (int) Math.round(ratio * max);
+   
+      return gsout;
    }
    
    /**

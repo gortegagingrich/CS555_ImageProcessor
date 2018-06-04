@@ -4,12 +4,14 @@
  * Description: Implementation of several filters for noise reduction
  */
 
-import javax.swing.*;
+import java.io.IOException;
 
 class Main {
    
-   public static void main(String[] args) {
-      SwingUtilities.invokeLater(MainWindow::new);
-      
+   public static void main(String[] args) throws IOException {
+      // I'm not sure how I would integrate assignment 4's functions into
+      // the gui, so this time, I am not displaying it.
+      // SwingUtilities.invokeLater(MainWindow::new);
+      Assignment4.main(args);
    }
 }
