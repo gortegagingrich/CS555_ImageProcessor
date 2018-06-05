@@ -1,3 +1,10 @@
+/*
+ * Name: Gabriel Ortega-Gingrich
+ * Assignment: Project
+ * Description: Implementation of similar reflectance prior based facial
+ * illumination transfer
+ */
+
 package project;
 
 import javax.imageio.ImageIO;
@@ -21,7 +28,7 @@ public class MultiChannelWindow extends JFrame {
       inputPane.setPreferredSize(new Dimension(512, 512));
       
       try {
-         inputImage = ImageIO.read(new File("test_rgb.jpg"));
+         inputImage = ImageIO.read(new File("source.png"));
          inputImageIcon = new ImageIcon(inputImage);
          inputPane = new JScrollPane(new JLabel(inputImageIcon));
       } catch (IOException e) {
@@ -35,7 +42,11 @@ public class MultiChannelWindow extends JFrame {
       add(inputPane);
       
       
-      outputChannels = new TabbedLayers(inputImage);
+      try {
+         outputChannels = new TabbedLayers(inputImage);
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
       add(outputChannels);
       
       // display

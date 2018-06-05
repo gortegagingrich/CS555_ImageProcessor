@@ -1,3 +1,10 @@
+/*
+ * Name: Gabriel Ortega-Gingrich
+ * Assignment: Project
+ * Description: Implementation of similar reflectance prior based facial
+ * illumination transfer
+ */
+
 package project;
 
 import java.util.function.BiFunction;
@@ -41,5 +48,9 @@ public class Util {
    
    public static float[][] mul(float[][] a, final float c) {
       return binaryMatrixOperation(a, null, (x, y) -> x * c);
+   }
+   
+   public static float[][] or(float[][] a, float[][] b) {
+      return binaryMatrixOperation(a, b, (x, y) -> (y == 1 | x == 1) ? 1f : 0f);
    }
 }

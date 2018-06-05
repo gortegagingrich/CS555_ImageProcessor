@@ -1,3 +1,10 @@
+/*
+ * Name: Gabriel Ortega-Gingrich
+ * Assignment: Project
+ * Description: Implementation of similar reflectance prior based facial
+ * illumination transfer
+ */
+
 package project;
 
 import java.awt.image.BufferedImage;
@@ -86,6 +93,20 @@ public class GenericImage {
       }
       
       return out;
+   }
+   
+   public float[][] getChannel(int channel) {
+      float[][] out = new float[channels[channel].length][channels[channel][0].length];
+      
+      for (int i = 0; i < out.length; i++) {
+         System.arraycopy(channels[channel][i], 0, out[i], 0, out[i].length);
+      }
+      
+      return out;
+   }
+   
+   public void setChannel(int channel, float[][] c) {
+      channels[channel] = c;
    }
    
    /**
